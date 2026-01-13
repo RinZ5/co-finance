@@ -2,12 +2,14 @@ package models
 
 // https://finnhub.io/docs/api/quote
 type StockQuote struct {
-	CurrentPrice float64 `json:"c"`
-	HighPrice    float64 `json:"h"`
-	LowPrice     float64 `json:"l"`
-	OpenPrice    float64 `json:"o"`
-	PrevClose    float64 `json:"pc"`
-	Timestamp    float64 `json:"t"`
+	CurrentPrice  float64 `json:"c"`
+	Change        float64 `json:"d"`
+	PercentChange float64 `json:"dp"`
+	HighPrice     float64 `json:"h"`
+	LowPrice      float64 `json:"l"`
+	OpenPrice     float64 `json:"o"`
+	PrevClose     float64 `json:"pc"`
+	Timestamp     float64 `json:"t"`
 }
 
 // https://finnhub.io/docs/api/company-basic-financials

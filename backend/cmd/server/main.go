@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/rinz5/stock-tracker/backend/internal/finnhub"
@@ -24,6 +25,10 @@ func main() {
 	client := finnhub.NewClient(apiKey)
 
 	r := gin.Default()
+
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"http://localhost:5173"}
+	r.Use(cors.New(config))
 
 	r.GET("/api/quote", func(ctx *gin.Context) {
 		symbol := ctx.Query("symbol")

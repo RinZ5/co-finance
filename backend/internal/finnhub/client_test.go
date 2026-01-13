@@ -14,6 +14,8 @@ func TestGetQuote(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{
 			"c": 261.74,
+			"d": 2.29,
+			"dp": 0.88,
 			"h": 263.31,
 			"l": 260.68,
 			"o": 261.07,
