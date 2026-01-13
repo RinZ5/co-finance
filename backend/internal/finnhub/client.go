@@ -68,3 +68,24 @@ func (c *Client) GetBasicFinancials(symbol string) (*models.BasicFinancials, err
 
 	return &financials, nil
 }
+
+func (c *Client) GetEarnings(symbol string) ([]models.EarningsSurprise, error) {
+	url := fmt.Sprintf("%s/stock/earnings?symbol=%s&token=%s", c.BaseURL, symbol, c.ApiKey)
+
+	resp, err := c.HTTPClient.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API error: status %d", resp.StatusCode)
+	}
+
+	var earnings []models.EarningsSurprise
+	if err := json.NewDecoder(resp.Body).Decode(&earnings); err != nil {
+		return nil, err
+	}
+
+	return earnings, nil
+}

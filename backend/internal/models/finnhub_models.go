@@ -45,6 +45,8 @@ type EarningsSurprise struct {
 	Actual          float64 `json:"actual"`
 	Estimate        float64 `json:"estimate"`
 	Period          string  `json:"period"`
+	Quarter         int     `json:"quarter"`
+	Year            int     `json:"year"`
 	Surprise        float64 `json:"surprise"`
 	SurprisePercent float64 `json:"surprisePercent"`
 	Symbol          string  `json:"symbol"`
