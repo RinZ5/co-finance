@@ -7,12 +7,17 @@ const props = defineProps<{
 }>();
 
 const maxVal = computed(() => {
-  if (!props.earnings.length) return 1;
-  const values = props.earnings.flatMap(e => [e.actual, e.estimate]);
-  return Math.max(...values) * 1.1;
+  if (!props.earnings?.length) return 1;
+  const values = props.earnings.flatMap(e => [Math.abs(e.actual), Math.abs(e.estimate)]);
+  const max = Math.max(...values);
+  return max === 0 ? 1 : max * 1.1; // 10% headroom
 });
 
-const getHeight = (val: number) => `${(val / maxVal.value) * 100}%`;
+const getHeight = (val: number) => {
+  if (!val) return '0%';
+  const percentage = (Math.abs(val) / maxVal.value) * 100;
+  return `${Math.min(percentage, 100)}%`;
+};
 </script>
 
 <template>
