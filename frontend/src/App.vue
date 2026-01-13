@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import { CompanyNews, type DashboardData } from './types/types.ts';
+import type { CompanyNews, DashboardData } from './types/types.ts';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
 
@@ -71,7 +71,7 @@ watch(
 <template>
   <div class="min-h-screen w-full bg-gray-50 text-slate-800 font-sans">
 
-    <div class="w-full px-4 md:px-6 py-4 flex justify-between items-center bg-white border-b border-gray-100 mb-6">
+    <div class="w-full px-4 md:px-6 py-4 flex justify-between items-center bg-white border-b border-gray-100">
       <div class="font-bold text-xl tracking-tight text-slate-800">
         FinDash
       </div>

@@ -23,7 +23,7 @@ const getHeight = (val: number) => {
 <template>
   <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 h-full flex flex-col">
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-lg font-semibold text-slate-800">Earnings Surprise</h2>
+      <h2 class="text-lg font-semibold text-slate-800">Earnings History</h2>
       <div class="flex gap-4 text-xs">
         <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span> Actual</div>
         <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-gray-300"></span> Estimate</div>
