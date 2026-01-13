@@ -41,6 +41,54 @@ func main() {
 		ctx.JSON(http.StatusOK, quote)
 	})
 
+	r.GET("/api/financials", func(ctx *gin.Context) {
+		symbol := ctx.Query("symbol")
+		if symbol == "" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Symbol is required"})
+			return
+		}
+
+		financials, err := client.GetBasicFinancials(symbol)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, financials)
+	})
+
+	r.GET("/api/earnings", func(ctx *gin.Context) {
+		symbol := ctx.Query("symbol")
+		if symbol == "" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Symbol is required"})
+			return
+		}
+
+		earnings, err := client.GetEarnings(symbol)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, earnings)
+	})
+
+	r.GET("/api/insider", func(ctx *gin.Context) {
+		symbol := ctx.Query("symbol")
+		if symbol == "" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Symbol is required"})
+			return
+		}
+
+		transactions, err := client.GetInsiderTransactions(symbol)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, transactions)
+	})
+
 	log.Println("Server running on http://localhost:8080")
 	if err := r.Run(":8080"); err != nil {
 		log.Fatal("Failed to start server:", err)
