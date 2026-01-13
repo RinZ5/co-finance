@@ -47,3 +47,24 @@ func (c *Client) GetQuote(symbol string) (*models.StockQuote, error) {
 
 	return &quote, nil
 }
+
+func (c *Client) GetBasicFinancials(symbol string) (*models.BasicFinancials, error) {
+	url := fmt.Sprintf("%s/stock/metric?symbol=%s&metric=all&token=%s", c.BaseURL, symbol, c.ApiKey)
+
+	resp, err := c.HTTPClient.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API error: status %d", resp.StatusCode)
+	}
+
+	var financials models.BasicFinancials
+	if err := json.NewDecoder(resp.Body).Decode(&financials); err != nil {
+		return nil, err
+	}
+
+	return &financials, nil
+}

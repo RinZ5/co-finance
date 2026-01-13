@@ -36,7 +36,7 @@ type BasicFinancials struct {
 		DividendYield        float64 `json:"dividendYieldIndicatedAnnual"`
 		Beta                 float64 `json:"beta"`
 	} `json:"metric"`
-	MatricType string `json:"metricType"`
+	MetricType string `json:"metricType"`
 	Symbol     string `json:"symbol"`
 }
 
