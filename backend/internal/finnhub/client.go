@@ -89,3 +89,27 @@ func (c *Client) GetEarnings(symbol string) ([]models.EarningsSurprise, error) {
 
 	return earnings, nil
 }
+
+func (c *Client) GetInsiderTransactions(symbol string) ([]models.InsiderTransaction, error) {
+	url := fmt.Sprintf("%s/stock/insider-transactions?symbol=%s&token=%s", c.BaseURL, symbol, c.ApiKey)
+
+	resp, err := c.HTTPClient.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API error: status %d", resp.StatusCode)
+	}
+
+	var wrapper struct {
+		Data []models.InsiderTransaction `json:"data"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&wrapper); err != nil {
+		return nil, err
+	}
+
+	return wrapper.Data, nil
+}

@@ -13,12 +13,12 @@ func TestGetQuote(t *testing.T) {
 		}
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{
-		  "c": 261.74,
-		  "h": 263.31,
-		  "l": 260.68,
-		  "o": 261.07,
-		  "pc": 259.45,
-		  "t": 1582641000
+			"c": 261.74,
+			"h": 263.31,
+			"l": 260.68,
+			"o": 261.07,
+			"pc": 259.45,
+			"t": 1582641000
 		}`))
 	}))
 	defer mockServer.Close()
@@ -97,36 +97,36 @@ func TestGetEarnings(t *testing.T) {
 
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`[
-		  {
-		    "actual": 1.88,
-		    "estimate": 1.9744,
-		    "period": "2023-03-31",
-		    "quarter": 1,
-		    "surprise": -0.0944,
-		    "surprisePercent": -4.7812,
-		    "symbol": "AAPL",
-		    "year": 2023
-		  },
-		  {
-		    "actual": 1.29,
-		    "estimate": 1.2957,
-		    "period": "2022-12-31",
-		    "quarter": 4,
-		    "surprise": -0.0057,
-		    "surprisePercent": -0.4399,
-		    "symbol": "AAPL",
-		    "year": 2022
-		  },
-		  {
-		    "actual": 1.2,
-		    "estimate": 1.1855,
-		    "period": "2022-09-30",
-		    "quarter": 3,
-		    "surprise": 0.0145,
-		    "surprisePercent": 1.2231,
-		    "symbol": "AAPL",
-		    "year": 2022
-		  }
+			{
+				"actual": 1.88,
+				"estimate": 1.9744,
+				"period": "2023-03-31",
+				"quarter": 1,
+				"surprise": -0.0944,
+				"surprisePercent": -4.7812,
+				"symbol": "AAPL",
+				"year": 2023
+			},
+			{
+				"actual": 1.29,
+				"estimate": 1.2957,
+				"period": "2022-12-31",
+				"quarter": 4,
+				"surprise": -0.0057,
+				"surprisePercent": -0.4399,
+				"symbol": "AAPL",
+				"year": 2022
+			},
+			{
+				"actual": 1.2,
+				"estimate": 1.1855,
+				"period": "2022-09-30",
+				"quarter": 3,
+				"surprise": 0.0145,
+				"surprisePercent": 1.2231,
+				"symbol": "AAPL",
+				"year": 2022
+			}
 		]`))
 	}))
 	defer mockServer.Close()
@@ -154,5 +154,68 @@ func TestGetEarnings(t *testing.T) {
 
 	if earnings[0].Year != 2023 {
 		t.Errorf("Expected year 2023, got %d", earnings[0].Year)
+	}
+}
+
+func TestGetInsiderTransactions(t *testing.T) {
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/stock/insider-transactions" {
+			t.Errorf("Expected path /stock/insider-transactions, got %s", r.URL.Path)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{
+			"data": [
+				{
+					"name": "Kirkhorn Zachary",
+					"share": 57234,
+					"change": -1250,
+					"filingDate": "2021-03-19",
+					"transactionDate": "2021-03-17",
+					"transactionCode": "S",
+					"transactionPrice": 655.81
+				},
+				{
+					"name": "Baglino Andrew D",
+					"share": 20614,
+					"change": 1000,
+					"filingDate": "2021-03-31",
+					"transactionDate": "2021-03-29",
+					"transactionCode": "M",
+					"transactionPrice": 41.57
+				},
+				{
+					"name": "Baglino Andrew D",
+					"share": 19114,
+					"change": -1500,
+					"filingDate": "2021-03-31",
+					"transactionDate": "2021-03-29",
+					"transactionCode": "S",
+					"transactionPrice": 615.75
+				}
+			],
+			"symbol": "TSLA"
+		}`))
+	}))
+	defer mockServer.Close()
+
+	client := NewClient("fake-key")
+	client.BaseURL = mockServer.URL
+
+	transactions, err := client.GetInsiderTransactions("AAPL")
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	if len(transactions) != 3 {
+		t.Errorf("Expected 3 transactions, got %d", len(transactions))
+	}
+
+	if transactions[0].Name != "Kirkhorn Zachary" {
+		t.Errorf("Expected name Kirkhorn Zachary, got %s", transactions[0].Name)
+	}
+	if transactions[0].Change != -1250 {
+		t.Errorf("Expected change -1250, got %f", transactions[0].Change)
 	}
 }
