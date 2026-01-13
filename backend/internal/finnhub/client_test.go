@@ -146,16 +146,75 @@ func TestGetEarnings(t *testing.T) {
 		t.Errorf("Expected 3 earnings records, got %d", len(earnings))
 	}
 
-	if earnings[0].Actual != 1.88 {
-		t.Errorf("Expected actual 1.88, got %f", earnings[0].Actual)
+	earning := earnings[0]
+	if earning.Actual != 1.88 {
+		t.Errorf("Expected actual 1.88, got %f", earning.Actual)
 	}
 
-	if earnings[0].Quarter != 1 {
-		t.Errorf("Expected quarter 1, got %d", earnings[0].Quarter)
+	if earning.Quarter != 1 {
+		t.Errorf("Expected quarter 1, got %d", earning.Quarter)
 	}
 
-	if earnings[0].Year != 2023 {
-		t.Errorf("Expected year 2023, got %d", earnings[0].Year)
+	if earning.Year != 2023 {
+		t.Errorf("Expected year 2023, got %d", earning.Year)
+	}
+}
+
+func TestGetRecommendations(t *testing.T) {
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/stock/recommendation" {
+			t.Errorf("Expected path /stock/recommendation, got %s", r.URL.Path)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`[
+			{
+				"buy": 24,
+				"hold": 7,
+				"period": "2025-03-01",
+				"sell": 0,
+				"strongBuy": 13,
+				"strongSell": 0,
+				"symbol": "AAPL"
+			},
+			{
+				"buy": 17,
+				"hold": 13,
+				"period": "2025-02-01",
+				"sell": 5,
+				"strongBuy": 13,
+				"strongSell": 0,
+				"symbol": "AAPL"
+			}
+		]`))
+	}))
+	defer mockServer.Close()
+
+	client := NewClient("fake-key")
+	client.BaseURL = mockServer.URL
+
+	recommendations, err := client.GetRecommendations("AAPL")
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	if len(recommendations) != 2 {
+		t.Errorf("Expected 2 recommendation periods, got %d", len(recommendations))
+	}
+
+	rec := recommendations[0]
+	if rec.Period != "2025-03-01" {
+		t.Errorf("Expected period 2025-03-01, got %s", rec.Period)
+	}
+	if rec.Buy != 24 {
+		t.Errorf("Expected 24 buys, got %d", rec.Buy)
+	}
+	if rec.Hold != 7 {
+		t.Errorf("Expected 7 holds, got %d", rec.Hold)
+	}
+	if rec.StrongBuy != 13 {
+		t.Errorf("Expected 13 strong buys, got %d", rec.StrongBuy)
 	}
 }
 

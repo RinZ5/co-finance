@@ -78,6 +78,22 @@ func main() {
 		ctx.JSON(http.StatusOK, earnings)
 	})
 
+	r.GET("/api/recommendations", func(ctx *gin.Context) {
+		symbol := ctx.Query("symbol")
+		if symbol == "" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Symbol is required"})
+			return
+		}
+
+		recommendations, err := client.GetRecommendations(symbol)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, recommendations)
+	})
+
 	r.GET("/api/insider", func(ctx *gin.Context) {
 		symbol := ctx.Query("symbol")
 		if symbol == "" {
