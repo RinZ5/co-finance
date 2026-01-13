@@ -8,8 +8,19 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"golang.org/x/sync/errgroup"
+
 	"github.com/rinz5/stock-tracker/backend/internal/finnhub"
+	"github.com/rinz5/stock-tracker/backend/internal/models"
 )
+
+type DashboardResponse struct {
+	Quote           *models.StockQuote           `json:"quote"`
+	Financials      *models.BasicFinancials      `json:"financials"`
+	Earnings        []models.EarningsSurprise    `json:"earnings"`
+	Recommendations []models.RecommendationTrend `json:"recommendations"`
+	Insiders        []models.InsiderTransaction  `json:"insiders"`
+}
 
 func main() {
 	err := godotenv.Load()
@@ -108,6 +119,55 @@ func main() {
 		}
 
 		ctx.JSON(http.StatusOK, transactions)
+	})
+
+	r.GET("/api/dashboard", func(ctx *gin.Context) {
+		symbol := ctx.Query("symbol")
+		if symbol == "" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Symbol is required"})
+			return
+		}
+
+		var res DashboardResponse
+
+		g, _ := errgroup.WithContext(ctx.Request.Context())
+
+		g.Go(func() error {
+			var err error
+			res.Quote, err = client.GetQuote(symbol)
+			return err
+		})
+
+		g.Go(func() error {
+			var err error
+			res.Financials, err = client.GetBasicFinancials(symbol)
+			return err
+		})
+
+		g.Go(func() error {
+			var err error
+			res.Earnings, err = client.GetEarnings(symbol)
+			return err
+		})
+
+		g.Go(func() error {
+			var err error
+			res.Recommendations, err = client.GetRecommendations(symbol)
+			return err
+		})
+
+		g.Go(func() error {
+			var err error
+			res.Insiders, err = client.GetInsiderTransactions(symbol)
+			return err
+		})
+
+		if err := g.Wait(); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch dashboard data: " + err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, res)
 	})
 
 	log.Println("Server running on http://localhost:8080")
