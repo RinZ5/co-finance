@@ -170,6 +170,25 @@ func main() {
 		ctx.JSON(http.StatusOK, res)
 	})
 
+	r.GET("/api/company-news", func(ctx *gin.Context) {
+		symbol := ctx.Query("symbol")
+		from := ctx.Query("from")
+		to := ctx.Query("to")
+
+		if symbol == "" || from == "" || to == "" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Symbol, from, and to parameters are required"})
+			return
+		}
+
+		news, err := client.GetCompanyNews(symbol, from, to)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, news)
+	})
+
 	log.Println("Server running on http://localhost:8080")
 	if err := r.Run(":8080"); err != nil {
 		log.Fatal("Failed to start server:", err)
