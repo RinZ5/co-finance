@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useStockStore } from '../types/stores/stock';
+import { useStockStore } from '../stores/stock';
 
 const store = useStockStore();
 const searchQuery = ref('');
