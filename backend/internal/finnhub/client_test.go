@@ -280,3 +280,78 @@ func TestGetInsiderTransactions(t *testing.T) {
 		t.Errorf("Expected change -1250, got %f", transactions[0].Change)
 	}
 }
+
+func TestGetCompanyNews(t *testing.T) {
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/company-news" {
+			t.Errorf("Expected path /company-news, got %s", r.URL.Path)
+		}
+
+		query := r.URL.Query()
+		if query.Get("symbol") != "AAPL" {
+			t.Errorf("Expected symbol AAPL, got %s", query.Get("symbol"))
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`[
+			{
+				"category": "company news",
+				"datetime": 1569550360,
+				"headline": "More sops needed to boost electronic manufacturing",
+				"id": 25286,
+				"image": "https://img.etimg.com/photo.jpg",
+				"related": "AAPL",
+				"source": "The Economic Times India",
+				"summary": "India may have to offer electronic manufacturers...",
+				"url": "https://economictimes.indiatimes.com/articleshow/71321308.cms"
+			},
+			{
+				"category": "company news",
+				"datetime": 1569528720,
+				"headline": "How to disable comments on your YouTube videos",
+				"id": 25287,
+				"image": "https://amp.businessinsider.com/images/5d8d1618.jpg",
+				"related": "AAPL",
+				"source": "Business Insider",
+				"summary": "You can disable comments on your own YouTube video...",
+				"url": "https://www.businessinsider.com/how-to-disable-comments-on-youtube"
+			},
+			{
+				"category": "company news",
+				"datetime": 1569526180,
+				"headline": "Apple iPhone 11 Pro Teardowns Look Encouraging",
+				"id": 25341,
+				"image": "http://s.thestreet.com/files/tsc/v2008/photos.png",
+				"related": "AAPL",
+				"source": "TheStreet",
+				"summary": "STMicroelectronics and Sony each appear to be supplying...",
+				"url": "https://realmoney.thestreet.com/investing/technology/iphone-11-pro"
+			}
+		]`))
+	}))
+	defer mockServer.Close()
+
+	client := NewClient("fake-key")
+	client.BaseURL = mockServer.URL
+
+	news, err := client.GetCompanyNews("AAPL", "2023-01-01", "2023-01-07")
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	if len(news) != 3 {
+		t.Errorf("Expected 3 news items, got %d", len(news))
+	}
+
+	item := news[0]
+	if item.Id != 25286 {
+		t.Errorf("Expected ID 25286, got %d", item.Id)
+	}
+	if item.Source != "The Economic Times India" {
+		t.Errorf("Expected source 'The Economic Times India', got %s", item.Source)
+	}
+	if item.Datetime != 1569550360 {
+		t.Errorf("Expected datetime 1569550360, got %d", item.Datetime)
+	}
+}

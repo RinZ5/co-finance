@@ -80,3 +80,15 @@ type InsiderTransaction struct {
 	TransactionPrice float64 `json:"transactionPrice"`
 	Symbol           string  `json:"symbol"`
 }
+
+type CompanyNews struct {
+	Category string `json:"category"`
+	Datetime int64  `json:"datetime"`
+	Headline string `json:"headline"`
+	Id       int64  `json:"id"`
+	Image    string `json:"image"`
+	Related  string `json:"related"`
+	Source   string `json:"source"`
+	Summary  string `json:"summary"`
+	Url      string `json:"url"`
+}

@@ -134,3 +134,24 @@ func (c *Client) GetInsiderTransactions(symbol string) ([]models.InsiderTransact
 
 	return wrapper.Data, nil
 }
+
+func (c *Client) GetCompanyNews(symbol, from, to string) ([]models.CompanyNews, error) {
+	url := fmt.Sprintf("%s/company-news?symbol=%s&from=%s&to=%s&token=%s", c.BaseURL, symbol, from, to, c.ApiKey)
+
+	resp, err := c.HTTPClient.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API error: %s", resp.Status)
+	}
+
+	var news []models.CompanyNews
+	if err := json.NewDecoder(resp.Body).Decode(&news); err != nil {
+		return nil, err
+	}
+
+	return news, nil
+}
