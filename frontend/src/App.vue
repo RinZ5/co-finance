@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import type { DashboardData } from './types/types.ts';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
@@ -10,23 +10,21 @@ import KeyStats from './components/KeyStats.vue';
 import EarningsChart from './components/EarningsChart.vue';
 import RecTrends from './components/RecTrends.vue';
 import InsiderTable from './components/InsiderTable.vue';
+import { useStockStore } from './types/stores/stock.ts';
 
 NProgress.configure({ showSpinner: false })
 
-const symbol = ref('AAPL');
+const store = useStockStore();
+
 const dashboardData = ref<DashboardData | null>(null);
 const error = ref<string | null>(null);
 
-const fetchData = async (newSymbol?: string | Event) => {
-  if (typeof newSymbol === 'string') {
-    symbol.value = newSymbol;
-  }
-
+const fetchData = async () => {
   NProgress.start();
   error.value = null;
 
   try {
-    const response = await fetch(`/api/dashboard?symbol=${symbol.value}`);
+    const response = await fetch(`/api/dashboard?symbol=${store.symbol}`);
 
     if (!response.ok) {
       throw new Error(`Error: ${response.status} ${response.statusText}`);
@@ -45,6 +43,13 @@ const fetchData = async (newSymbol?: string | Event) => {
 onMounted(() => {
   fetchData();
 });
+
+watch(
+  () => store.symbol,
+  () => {
+    fetchData();
+  }
+);
 </script>
 
 <template>

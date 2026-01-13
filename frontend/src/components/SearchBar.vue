@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useStockStore } from '../types/stores/stock';
 
-const emit = defineEmits<{
-  (e: 'search', symbol: string): void
-}>();
-
+const store = useStockStore();
 const searchQuery = ref('');
 
 const handleSubmit = () => {
   if (searchQuery.value.trim()) {
-    emit('search', searchQuery.value.toUpperCase());
+    store.setSymbol(searchQuery.value)
     searchQuery.value = '';
   }
 };
