@@ -4,6 +4,7 @@ import type { DashboardData } from './types/types.ts';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
 
+import SearchBar from './components/SearchBar.vue';
 import StockHeader from './components/StockHeader.vue';
 import KeyStats from './components/KeyStats.vue';
 import EarningsChart from './components/EarningsChart.vue';
@@ -16,7 +17,11 @@ const symbol = ref('AAPL');
 const dashboardData = ref<DashboardData | null>(null);
 const error = ref<string | null>(null);
 
-const fetchData = async () => {
+const fetchData = async (newSymbol?: string | Event) => {
+  if (typeof newSymbol === 'string') {
+    symbol.value = newSymbol;
+  }
+
   NProgress.start();
   error.value = null;
 
@@ -45,6 +50,13 @@ onMounted(() => {
 <template>
   <div class="min-h-screen w-full bg-gray-50 text-slate-800 font-sans">
 
+    <div class="w-full px-4 md:px-6 py-4 flex justify-between items-center bg-white border-b border-gray-100 mb-6">
+      <div class="font-bold text-xl tracking-tight text-slate-800">
+        FinDash
+      </div>
+      <SearchBar @search="fetchData" />
+    </div>
+
     <div v-if="error" class="flex h-screen items-center justify-center">
       <div class="bg-red-50 text-red-600 px-6 py-4 rounded-xl border border-red-100 text-center">
         <p class="font-bold">Connection Failed</p>
@@ -56,7 +68,7 @@ onMounted(() => {
 
     <div v-else-if="dashboardData" class="w-full h-full p-4 md:p-6 space-y-6 animate-fade-in-up">
 
-      <StockHeader :quote="dashboardData.quote" :profile="dashboardData.financials" />
+      <StockHeader :quote="dashboardData.quote" :profile="dashboardData.financials" @search="fetchData" />
 
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
 
