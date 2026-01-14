@@ -19,7 +19,7 @@ export interface BasicFinancials {
     beta: number;
   };
   Series?: {
-    annual: {
+    Annual: {
       currentRatio?: Array<{ period: string; v: number }>;
       salesPerShare?: Array<{ period: string; v: number }>;
       netMargin?: Array<{ period: string; v: number }>;
