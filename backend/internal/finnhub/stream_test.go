@@ -48,3 +48,30 @@ func TestStreamClient(t *testing.T) {
 		t.Fatal("Did not receive message from mock server in time")
 	}
 }
+
+func TestStreamClientSubscription(t *testing.T) {
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		c, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			return
+		}
+		defer c.Close()
+
+		_, msg, _ := c.ReadMessage()
+		if !strings.Contains(string(msg), "subscribe") || !strings.Contains(string(msg), "TSLA") {
+			t.Errorf("Expected subscription for TSLA, got %s", msg)
+		}
+	}))
+	defer mockServer.Close()
+
+	wsURL := "ws" + strings.TrimPrefix(mockServer.URL, "http")
+	client := NewStreamClient("fake-token", []string{})
+	client.BaseURL = wsURL
+
+	go client.Start(make(chan []byte))
+
+	time.Sleep(50 * time.Millisecond)
+	client.Subscribe("TSLA")
+
+	time.Sleep(50 * time.Millisecond)
+}
