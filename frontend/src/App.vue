@@ -123,7 +123,7 @@ watch(
     <div v-else-if="dashboardData" class="w-full h-full p-4 md:p-6 space-y-6 animate-fade-in-up">
 
       <StockHeader :quote="dashboardData.quote" :profile="dashboardData.financials"
-        :marketStatus="marketStore.marketStatus" />
+        :marketStatus="marketStore.marketStatus" :symbol="store.symbol" />
 
       <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
         <div class="xl:col-span-1 flex flex-col gap-6 ">

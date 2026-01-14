@@ -1,11 +1,21 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import type { StockQuote } from '../types/types.ts'
+import { useWebSocketStore } from '../stores/websocketStore.ts';
 
 const props = defineProps<{
+  symbol: string;
   quote: StockQuote;
   variant?: 'mobile' | 'desktop';
 }>();
+
+const store = useWebSocketStore()
+
+const prevClose = computed(() => props.quote.c - props.quote.d);
+
+const price = computed(() => store.currentPrice ?? props.quote.c);
+const change = computed(() => price.value - prevClose.value);
+const percent = computed(() => (change.value / prevClose.value) * 100);
 
 const formatCurrency = (val: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
@@ -13,8 +23,8 @@ const formatCurrency = (val: number) =>
 const isPositive = computed(() => props.quote.d >= 0);
 
 const priceClasses = computed(() => {
-  const base = props.variant === 'mobile' 
-    ? 'text-3xl' 
+  const base = props.variant === 'mobile'
+    ? 'text-3xl'
     : 'text-4xl font-bold tracking-tight text-slate-900';
   return base;
 });
@@ -27,29 +37,33 @@ const changeClasses = computed(() => {
 });
 
 const percentBadgeClasses = computed(() => {
-  return `text-sm px-2 py-0.5 rounded-full bg-opacity-10 ${
-    isPositive.value 
-      ? 'bg-green-100 text-green-700' 
-      : 'bg-red-100 text-red-700'
-  }`;
+  return `text-sm px-2 py-0.5 rounded-full bg-opacity-10 ${isPositive.value
+    ? 'bg-green-100 text-green-700'
+    : 'bg-red-100 text-red-700'
+    }`;
+});
+
+onMounted(() => {
+  store.connect();
+  store.subscribe(props.symbol);
 });
 </script>
 
 <template>
   <div :class="variant === 'mobile' ? 'md:hidden text-right' : 'hidden md:block text-right'">
     <div :class="priceClasses">
-      {{ formatCurrency(quote.c) }}
+      {{ formatCurrency(price) }}
     </div>
 
     <div :class="changeClasses">
-      <span>{{ isPositive ? '+' : '' }}{{ quote.d.toFixed(2) }}</span>
-      
+      <span>{{ isPositive ? '+' : '' }}{{ change.toFixed(2) }}</span>
+
       <span v-if="variant === 'desktop'" :class="percentBadgeClasses">
-        {{ isPositive ? '+' : '' }}{{ quote.dp.toFixed(2) }}%
+        {{ isPositive ? '+' : '' }}{{ percent.toFixed(2) }}%
       </span>
-      
+
       <span v-else>
-        ({{ isPositive ? '+' : '' }}{{ quote.dp.toFixed(2) }}%)
+        ({{ isPositive ? '+' : '' }}{{ percent.toFixed(2) }}%)
       </span>
     </div>
   </div>

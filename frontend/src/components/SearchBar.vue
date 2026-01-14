@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useStockStore } from '../stores/stock';
+import { useWebSocketStore } from '../stores/websocketStore';
 
 const store = useStockStore();
+const wsStore = useWebSocketStore();
 const rawQuery = ref('')
 
 const searchQuery = computed({
@@ -14,7 +16,11 @@ const searchQuery = computed({
 
 const handleSubmit = () => {
   if (searchQuery.value.trim()) {
-    store.setSymbol(searchQuery.value)
+    const symbol = searchQuery.value
+
+    store.setSymbol(symbol)
+    wsStore.subscribe(symbol)
+
     searchQuery.value = '';
   }
 };

@@ -8,7 +8,8 @@ import PriceRange from './PriceRange.vue'
 const props = defineProps<{
   quote: StockQuote;
   profile: BasicFinancials;
-  marketStatus?: MarketStatus
+  marketStatus?: MarketStatus;
+  symbol: string;
 }>();
 </script>
 
@@ -20,7 +21,7 @@ const props = defineProps<{
       <div class="flex justify-between gap-4">
         <StockSymbol :symbol="profile.symbol" :market-status="marketStatus" />
         <div class="md:hidden">
-          <StockPrice :quote="quote" variant="mobile" />
+          <StockPrice :quote="quote" :symbol="symbol" variant="mobile" />
         </div>
       </div>
       <StockStats :quote="quote" />
@@ -33,7 +34,7 @@ const props = defineProps<{
       </div>
 
       <div class="shrink-0 text-right">
-        <StockPrice :quote="quote" variant="desktop" />
+        <StockPrice :quote="quote" :symbol="symbol" variant="desktop" />
       </div>
 
     </div>
