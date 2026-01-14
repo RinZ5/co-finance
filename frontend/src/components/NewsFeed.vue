@@ -80,7 +80,7 @@ const filteredNews = computed(() => {
       </div>
     </div>
 
-    <div class="overflow-y-auto pr-2 custom-scrollbar flex-1 max-h-[600px] space-y-4">
+    <div class="overflow-y-auto pr-2 custom-scrollbar flex-1 max-h-150 space-y-4">
 
       <div v-if="news.length === 0" class="text-gray-400 text-sm text-center py-10">
         No news found in selected range
