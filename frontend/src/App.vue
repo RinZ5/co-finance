@@ -131,16 +131,25 @@ watch(
           <KeyStats :financials="dashboardData.financials" />
         </div>
 
-        <div class="md:col-span-2 xl:col-span-2 flex flex-col gap-6">
-          <EarningsChart :earnings="dashboardData.earnings" />
+        <div :class="[
+          'flex flex-col gap-6',
+          dashboardData.insiders && dashboardData.insiders.length > 0 
+            ? 'md:col-span-2 xl:col-span-2' 
+            : 'md:col-span-3 xl:col-span-3'
+        ]">
           <NewsFeed :news="companyNews" />
+          <EarningsChart v-if="dashboardData.earnings && dashboardData.earnings.length > 0"
+            :earnings="dashboardData.earnings" />
         </div>
 
-        <div class="xl:col-span-1 flex flex-col gap-6">
+        <div v-if="dashboardData.insiders && dashboardData.insiders.length > 0" class="xl:col-span-1 flex flex-col gap-6">
           <RecTrends :trend="dashboardData.recommendations" />
           <div class="flex-1 min-h-[300px]">
             <InsiderTable :transactions="dashboardData.insiders" />
           </div>
+        </div>
+        <div v-else class="xl:col-span-1 flex flex-col gap-6">
+          <RecTrends :trend="dashboardData.recommendations" />
         </div>
 
       </div>
