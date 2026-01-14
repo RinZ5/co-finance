@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-const formatDate = (date: Date) => date.toISOString().split('T')[0];
-
 export const useStockStore = defineStore('stock', () => {
   const symbol = ref('AAPL');
 
@@ -10,8 +8,8 @@ export const useStockStore = defineStore('stock', () => {
   const threeDaysAgo = new Date();
   threeDaysAgo.setDate(today.getDate() - 3);
 
-  const newsFrom = ref(formatDate(threeDaysAgo));
-  const newsTo = ref(formatDate(today));
+  const newsFrom = ref<Date>(threeDaysAgo);
+  const newsTo = ref<Date>(today);
 
   function setSymbol(newSymbol: string) {
     if (newSymbol && typeof newSymbol === 'string') {
@@ -19,7 +17,7 @@ export const useStockStore = defineStore('stock', () => {
     }
   }
 
-  function setDateRange(from: string, to: string) {
+  function setDateRange(from: Date, to: Date) {
     newsFrom.value = from;
     newsTo.value = to;
   }

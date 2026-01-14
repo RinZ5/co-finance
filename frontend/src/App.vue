@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import type { CompanyNews, DashboardData } from './types/types.ts';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
@@ -21,6 +21,19 @@ const dashboardData = ref<DashboardData | null>(null);
 const companyNews = ref<CompanyNews[]>([]);
 const error = ref<string | null>(null);
 
+const apiFrom = computed(() =>
+  store.newsFrom
+    ? store.newsFrom.toISOString().split('T')[0]
+    : ''
+);
+
+const apiTo = computed(() =>
+  store.newsTo
+    ? store.newsTo.toISOString().split('T')[0]
+    : ''
+);
+
+
 const fetchData = async () => {
   NProgress.start();
   error.value = null;
@@ -35,7 +48,9 @@ const fetchData = async () => {
     const data = await response.json();
     dashboardData.value = data;
 
-    const newsUrl = `/api/company-news?symbol=${store.symbol}&from=${store.newsFrom}&to=${store.newsTo}`;
+    const newsUrl = `/api/company-news?symbol=${store.symbol}&from=${apiFrom.value}&to=${apiTo.value}`;
+
+
     const newsResponse = await fetch(newsUrl);
 
     if (newsResponse.ok) {

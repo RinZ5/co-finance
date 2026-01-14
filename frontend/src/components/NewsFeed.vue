@@ -3,6 +3,9 @@ import { computed } from 'vue';
 import { useStockStore } from '../stores/stock';
 import type { CompanyNews } from '../types/types';
 
+import { VueDatePicker } from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css';
+
 const props = defineProps<{
   news: CompanyNews[];
 }>();
@@ -10,13 +13,32 @@ const props = defineProps<{
 const store = useStockStore();
 
 const formatDisplayDate = (unixTime: number) => {
-  return new Date(unixTime * 1000).toLocaleDateString('en-US', {
+  return new Date(unixTime * 1000).toLocaleString('en-US', {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit'
   });
 };
+
+const startOfDay = (date: Date) =>
+  new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+const endOfDay = (date: Date) =>
+  new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
+
+const isWithinRange = (unix: number) => {
+  const d = new Date(unix * 1000);
+  return (
+    d >= startOfDay(store.newsFrom) &&
+    d <= endOfDay(store.newsTo)
+  );
+};
+
+const filteredNews = computed(() =>
+  props.news.filter(n => isWithinRange(n.datetime))
+);
+
 </script>
 
 <template>
@@ -25,17 +47,17 @@ const formatDisplayDate = (unixTime: number) => {
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 border-b border-gray-100 pb-4">
       <h2 class="text-lg font-semibold text-slate-800">Company News</h2>
 
-      <div class="flex items-center gap-2 text-sm">
+      <div class="flex gap-2">
         <div class="flex flex-col">
           <label class="text-[10px] text-gray-400 font-medium ml-1">From</label>
-          <input type="date" v-model="store.newsFrom"
-            class="bg-gray-50 border border-gray-200 text-gray-700 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1.5 outline-none">
+          <VueDatePicker v-model="store.newsFrom" :enable-time-picker="false" auto-apply format="yyyy-MM-dd"
+            class="text-xs" />
         </div>
-        <span class="text-gray-300 mt-4">-</span>
+
         <div class="flex flex-col">
           <label class="text-[10px] text-gray-400 font-medium ml-1">To</label>
-          <input type="date" v-model="store.newsTo"
-            class="bg-gray-50 border border-gray-200 text-gray-700 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1.5 outline-none">
+          <VueDatePicker v-model="store.newsTo" :enable-time-picker="false" auto-apply format="yyyy-MM-dd"
+            class="text-xs" />
         </div>
       </div>
     </div>
@@ -48,7 +70,7 @@ const formatDisplayDate = (unixTime: number) => {
           class="font-medium text-gray-500">{{ store.newsTo }}</span>.
       </div>
 
-      <a v-for="item in news" :key="item.id" :href="item.url" target="_blank" rel="noopener noreferrer"
+      <a v-for="item in filteredNews" :key="item.id" :href="item.url" target="_blank" rel="noopener noreferrer"
         class="block group hover:bg-gray-50 p-3 rounded-lg transition-colors border border-transparent hover:border-gray-100">
         <div class="flex gap-4">
           <div class="shrink-0">
