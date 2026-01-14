@@ -25,8 +25,12 @@ const getBarAlignSelf = (val: number) => {
 };
 
 const reversedEarnings = computed(() => {
-  return [...props.earnings].reverse()
-})
+  return [...props.earnings].reverse();
+});
+
+const formatValue = (val: number) => {
+  return `$${val.toFixed(2)}`;
+};
 </script>
 
 <template>
@@ -39,7 +43,10 @@ const reversedEarnings = computed(() => {
             :class="reversedEarnings.some(e => e.actual < 0) ? 'bg-red-500' : 'bg-blue-500'"></span>
           Actual
         </div>
-        <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-gray-300"></span> Estimate</div>
+        <div class="flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-gray-300"></span>
+          Estimate
+        </div>
       </div>
     </div>
 
@@ -47,22 +54,32 @@ const reversedEarnings = computed(() => {
       <div v-for="item in reversedEarnings" :key="item.period" class="flex flex-col items-center w-full group">
 
         <div class="flex gap-1 h-32 w-full justify-center relative items-center">
-          <div class="w-4 sm:w-3 md:w-6 bg-gray-300 transition-all duration-500 relative"
-            :class="[
-              item.estimate >= 0 ? 'rounded-t-sm' : 'rounded-b-sm'
-            ]"
-            :style="{
+          <div class="w-4 sm:w-3 md:w-6 bg-gray-300 transition-all duration-500 relative group/bar"
+            :class="[item.estimate >= 0 ? 'rounded-t-sm' : 'rounded-b-sm']" :style="{
               height: getHeight(item.estimate),
               alignSelf: getBarAlignSelf(item.estimate)
             }">
+
+            <div
+              class="absolute left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] font-medium py-1 px-2 rounded opacity-0 group-hover/bar:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-lg"
+              :class="item.estimate >= 0 ? 'bottom-full mb-1.5' : 'top-full mt-1.5'">
+              {{ formatValue(item.estimate) }}
+            </div>
           </div>
-          <div class="w-4 sm:w-3 md:w-6 transition-all duration-500 relative" :class="[
+
+          <div class="w-4 sm:w-3 md:w-6 transition-all duration-500 relative group/bar" :class="[
             item.actual >= 0 ? 'bg-blue-500 rounded-t-sm' : 'bg-red-500 rounded-b-sm',
             item.actual < 0 ? 'order-2' : 'order-1'
           ]" :style="{
-              height: getHeight(item.actual),
-              alignSelf: getBarAlignSelf(item.actual)
-            }">
+            height: getHeight(item.actual),
+            alignSelf: getBarAlignSelf(item.actual)
+          }">
+
+            <div
+              class="absolute left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] font-medium py-1 px-2 rounded opacity-0 group-hover/bar:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-lg"
+              :class="item.actual >= 0 ? 'bottom-full mb-1.5' : 'top-full mt-1.5'">
+              {{ formatValue(item.actual) }}
+            </div>
           </div>
         </div>
 
