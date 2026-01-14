@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -12,6 +13,9 @@ import (
 
 	"github.com/rinz5/co-finance/backend/internal/finnhub"
 	"github.com/rinz5/co-finance/backend/internal/models"
+	"github.com/rinz5/co-finance/backend/internal/websocket"
+
+	ws "github.com/gorilla/websocket"
 )
 
 type DashboardResponse struct {
@@ -33,12 +37,76 @@ func main() {
 		log.Fatal("Error: FINNHUB_API_KEY is not set.")
 	}
 
+	hub := websocket.NewHub()
+	go hub.Run()
+
+	streamer := finnhub.NewStreamClient(apiKey, []string{"AAPL"})
+	go streamer.Start(hub.Broadcast)
+
 	client := finnhub.NewClient(apiKey)
 
 	r := gin.Default()
 
+	r.GET("/ws", func(ctx *gin.Context) {
+		// var upgrader = ws.Upgrader{
+		// 	CheckOrigin: func(r *http.Request) bool {
+		// 		origin := r.Header.Get("Origin")
+		//
+		// 		log.Printf(" DEBUG: Incoming Connection from Origin: [%s]", origin)
+		//
+		// 		return true
+		// 	},
+		// }
+
+		var upgrader = ws.Upgrader{
+			CheckOrigin: func(r *http.Request) bool {
+				origin := r.Header.Get("Origin")
+
+				if origin == "http://localhost:5173" || origin == "http://127.0.0.1:5173" {
+					return true
+				}
+
+				if strings.HasPrefix(origin, "http://192.168.") {
+					return true
+				}
+
+				log.Printf("SECURITY: Blocked connection attempt from unauthorized Origin: %s", origin)
+				return false
+			},
+		}
+
+		conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+		if err != nil {
+			log.Println("Upgrade failed:", err)
+			return
+		}
+
+		hub.Register <- conn
+
+		defer func() {
+			hub.Unregister <- conn
+			conn.Close()
+		}()
+
+		for {
+			var msg struct {
+				Type   string `json:"type"`
+				Symbol string `json:"symbol"`
+			}
+
+			if err := conn.ReadJSON(&msg); err != nil {
+				break
+			}
+
+			if msg.Type == "subscribe" && msg.Symbol != "" {
+				log.Printf("Frontend requested subscription to: %s", msg.Symbol)
+				streamer.Subscribe(msg.Symbol)
+			}
+		}
+	})
+
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:5173"}
+	config.AllowOrigins = []string{"http://localhost:5173", "http://127.0.0.1:5173"}
 	r.Use(cors.New(config))
 
 	r.GET("/api/quote", func(ctx *gin.Context) {

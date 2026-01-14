@@ -11,8 +11,8 @@ import (
 type Hub struct {
 	clients    map[*websocket.Conn]bool
 	Broadcast  chan []byte
-	register   chan *websocket.Conn
-	unregister chan *websocket.Conn
+	Register   chan *websocket.Conn
+	Unregister chan *websocket.Conn
 	mu         sync.Mutex
 }
 
@@ -20,19 +20,19 @@ func NewHub() *Hub {
 	return &Hub{
 		clients:    make(map[*websocket.Conn]bool),
 		Broadcast:  make(chan []byte),
-		register:   make(chan *websocket.Conn),
-		unregister: make(chan *websocket.Conn),
+		Register:   make(chan *websocket.Conn),
+		Unregister: make(chan *websocket.Conn),
 	}
 }
 
 func (h *Hub) Run() {
 	for {
 		select {
-		case client := <-h.register:
+		case client := <-h.Register:
 			h.mu.Lock()
 			h.clients[client] = true
 			h.mu.Unlock()
-		case client := <-h.unregister:
+		case client := <-h.Unregister:
 			h.mu.Lock()
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
@@ -63,5 +63,5 @@ func (h *Hub) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 		log.Println("Upgrade error:", err)
 		return
 	}
-	h.register <- conn
+	h.Register <- conn
 }
