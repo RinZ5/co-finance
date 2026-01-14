@@ -10,7 +10,7 @@ const maxVal = computed(() => {
   if (!props.earnings?.length) return 1;
   const values = props.earnings.flatMap(e => [Math.abs(e.actual), Math.abs(e.estimate)]);
   const max = Math.max(...values);
-  return max === 0 ? 1 : max * 1.1; // 10% headroom
+  return max === 0 ? 1 : max * 1.1;
 });
 
 const getHeight = (val: number) => {
@@ -18,6 +18,10 @@ const getHeight = (val: number) => {
   const percentage = (Math.abs(val) / maxVal.value) * 100;
   return `${Math.min(percentage, 100)}%`;
 };
+
+const reversedEarnings = computed(() => {
+  return [...props.earnings].reverse()
+})
 </script>
 
 <template>
@@ -30,8 +34,8 @@ const getHeight = (val: number) => {
       </div>
     </div>
 
-    <div class="flex-1 flex items-end justify-between gap-2 min-h-[200px] pt-4">
-      <div v-for="item in earnings" :key="item.period" class="flex flex-col items-center w-full group">
+    <div class="flex-1 flex items-end justify-between gap-2 min-h-50 pt-4">
+      <div v-for="item in reversedEarnings" :key="item.period" class="flex flex-col items-center w-full group">
 
         <div class="flex items-end gap-1 h-32 w-full justify-center relative">
           <div class="w-3 md:w-6 bg-gray-300 rounded-t-sm transition-all duration-500 relative group-hover:bg-gray-400"
