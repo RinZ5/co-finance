@@ -69,16 +69,15 @@ onMounted(() => {
   <div
     class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
     <div>
+      <h1 class="text-3xl font-bold text-slate-900">{{ profile.symbol }}</h1>
       <div class="flex items-center gap-2">
-        <h1 class="text-3xl font-bold text-slate-900">{{ profile.symbol }}</h1>
-        <!-- <span class="px-2 py-0.5 rounded text-xs font-semibold bg-gray-200 text-gray-600">US Market</span> -->
+        <p class="text-gray-500 text-sm mt-1">
+          {{ marketTime }}
+        </p>
         <span class="px-2 py-0.5 rounded text-xs font-semibold" :class="badgeClass">
           {{ marketLabel }}
         </span>
       </div>
-      <p class="text-gray-500 text-sm mt-1">
-        {{ marketTime }}
-      </p>
     </div>
 
     <div class="text-right">
