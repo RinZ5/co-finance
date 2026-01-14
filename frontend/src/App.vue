@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, computed, triggerRef } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import type { CompanyNews, DashboardData } from './types/types.ts';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
@@ -144,7 +144,7 @@ watch(
 
         <div v-if="dashboardData.insiders && dashboardData.insiders.length > 0" class="xl:col-span-1 flex flex-col gap-6">
           <RecTrends :trend="dashboardData.recommendations" />
-          <div class="flex-1 min-h-[300px]">
+          <div class="h-fit">
             <InsiderTable :transactions="dashboardData.insiders" />
           </div>
         </div>
