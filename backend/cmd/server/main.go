@@ -47,6 +47,26 @@ func main() {
 
 	r := gin.Default()
 
+	rawOrigins := os.Getenv("ALLOWED_ORIGINS")
+
+	wsAllowedOrigins := make(map[string]bool)
+
+	var corsAllowedOrigins []string
+
+	if rawOrigins == "" {
+		rawOrigins = "http://localhost:5173,http://127.0.0.1:5173"
+	}
+
+	for origin := range strings.SplitSeq(rawOrigins, ",") {
+		cleanOrigin := strings.TrimSpace(origin)
+		if cleanOrigin == "" {
+			continue
+		}
+
+		wsAllowedOrigins[cleanOrigin] = true
+		corsAllowedOrigins = append(corsAllowedOrigins, cleanOrigin)
+	}
+
 	r.GET("/ws", func(ctx *gin.Context) {
 		// var upgrader = ws.Upgrader{
 		// 	CheckOrigin: func(r *http.Request) bool {
@@ -62,11 +82,7 @@ func main() {
 			CheckOrigin: func(r *http.Request) bool {
 				origin := r.Header.Get("Origin")
 
-				if origin == "http://localhost:5173" || origin == "http://127.0.0.1:5173" {
-					return true
-				}
-
-				if strings.HasPrefix(origin, "http://192.168.") {
+				if wsAllowedOrigins[origin] {
 					return true
 				}
 
@@ -106,7 +122,7 @@ func main() {
 	})
 
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:5173", "http://127.0.0.1:5173"}
+	config.AllowOrigins = corsAllowedOrigins
 	r.Use(cors.New(config))
 
 	r.GET("/api/quote", func(ctx *gin.Context) {
