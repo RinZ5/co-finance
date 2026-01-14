@@ -61,7 +61,9 @@ const filteredNews = computed(() => {
 </script>
 
 <template>
-  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 h-full flex flex-col">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col 
+            min-h-125 max-h-150 h-auto 
+            xl:h-full xl:max-h-none xl:min-h-0">
 
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 border-b border-gray-100 pb-4">
       <h2 class="text-lg font-semibold text-slate-800 shrink-0">
@@ -80,7 +82,7 @@ const filteredNews = computed(() => {
       </div>
     </div>
 
-    <div class="overflow-y-auto pr-2 custom-scrollbar flex-1 max-h-150 space-y-4">
+    <div class="overflow-y-auto pr-2 custom-scrollbar flex-1 space-y-4">
 
       <div v-if="news.length === 0" class="text-gray-400 text-sm text-center py-10">
         No news found in selected range

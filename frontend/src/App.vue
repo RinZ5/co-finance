@@ -126,7 +126,7 @@ watch(
         :marketStatus="marketStore.marketStatus" />
 
       <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
-        <div class="xl:col-span-1 flex flex-col gap-6 self-start">
+        <div class="xl:col-span-1 flex flex-col gap-6 ">
           <KeyStats :financials="dashboardData.financials" />
           <EarningsChart v-if="dashboardData.earnings && dashboardData.earnings.length > 0"
             :earnings="dashboardData.earnings" />
@@ -134,11 +134,14 @@ watch(
 
         <div :class="[
           'flex flex-col gap-6',
+          'xl:relative',
           dashboardData.insiders && dashboardData.insiders.length > 0
             ? 'xl:col-span-2'
             : 'xl:col-span-3'
         ]">
-          <NewsFeed :news="companyNews" />
+          <div class="xl:absolute xl:inset-0 w-full">
+            <NewsFeed :news="companyNews" />
+          </div>
         </div>
 
         <div class="xl:col-span-1 flex flex-col gap-6">
