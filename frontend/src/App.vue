@@ -80,7 +80,7 @@ const fetchData = async () => {
 
 onMounted(async () => {
   await marketStore.fetchMarketStatus('US')
-  marketStore.startHourlySync('US')
+  marketStore.stopMarketSync
   fetchData();
 });
 
