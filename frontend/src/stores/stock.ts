@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 export const useStockStore = defineStore('stock', () => {
-  const symbol = ref('AAPL');
+  const symbol = ref(localStorage.getItem('stock_symbol') || 'AAPL');
+
 
   const today = new Date();
   const threeDaysAgo = new Date();
@@ -19,6 +20,10 @@ export const useStockStore = defineStore('stock', () => {
   function setDateRange(from: Date, to: Date) {
     newsRange.value = [from, to]
   }
+
+  watch(symbol, (symbol) => {
+    localStorage.setItem('stock_symbol', symbol);
+  });
 
   return { symbol, newsRange, setSymbol, setDateRange };
 });
