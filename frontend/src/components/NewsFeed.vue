@@ -21,11 +21,20 @@ const formatDisplayDate = (unixTime: number) => {
   });
 };
 
-const startOfDay = (date: Date) =>
-  new Date(date.getFullYear(), date.getMonth(), date.getDate());
+const startOfDay = (date: Date | null) => {
+  if (!date) return null
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+}
 
-const endOfDay = (date: Date) =>
-  new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
+const endOfDay = (date: Date | null) => {
+  if (!date) return null
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    23, 59, 59, 999
+  )
+}
 
 const filteredNews = computed(() => {
   if (!store.newsRange || store.newsRange.length !== 2) {
@@ -33,14 +42,22 @@ const filteredNews = computed(() => {
   }
 
   const [from, to] = store.newsRange
-  const start = startOfDay(from)
-  const end = endOfDay(to)
 
-  return props.news.filter(item => {
-    const d = new Date(item.datetime * 1000)
-    return d >= start && d <= end
-  })
+  if (!from || !to) {
+    return props.news
+  }
+
+  const start = startOfDay(from)!
+  const end = endOfDay(to)!
+
+  return props.news
+    .filter(item => {
+      const d = new Date(item.datetime * 1000)
+      return d >= start && d <= end
+    })
+    .sort((a, b) => b.datetime - a.datetime)
 })
+
 </script>
 
 <template>

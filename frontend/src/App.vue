@@ -22,12 +22,20 @@ const companyNews = ref<CompanyNews[]>([]);
 const error = ref<string | null>(null);
 
 const apiFrom = computed(() => {
+  if (!store.newsRange || store.newsRange.length !== 2) return null
+
   const [from] = store.newsRange
+  if (!from) return null
+
   return from.toISOString().split('T')[0]
 })
 
 const apiTo = computed(() => {
+  if (!store.newsRange || store.newsRange.length !== 2) return null
+
   const [, to] = store.newsRange
+  if (!to) return null
+
   return to.toISOString().split('T')[0]
 })
 
@@ -42,8 +50,13 @@ const fetchData = async () => {
       throw new Error(`Error: ${response.status} ${response.statusText}`);
     }
 
-    const data = await response.json();
-    dashboardData.value = data;
+    dashboardData.value = await response.json();
+
+
+    if (!apiFrom.value || !apiTo.value) {
+      companyNews.value = []
+      return
+    }
 
     const newsUrl = `/api/company-news?symbol=${store.symbol}&from=${apiFrom.value}&to=${apiTo.value}`;
 
@@ -75,10 +88,13 @@ watch(
 );
 
 watch(
-  [() => store.newsRange],
-  () => fetchData(),
+  () => store.newsRange,
+  ([from, to]) => {
+    if (!from || !to) return
+    fetchData()
+  },
   { deep: true }
-);
+)
 </script>
 
 <template>
