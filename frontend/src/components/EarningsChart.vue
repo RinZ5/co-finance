@@ -19,6 +19,11 @@ const getHeight = (val: number) => {
   return `${Math.min(percentage, 100)}%`;
 };
 
+const getBarAlignSelf = (val: number) => {
+  if (!val || val >= 0) return 'flex-end';
+  return 'flex-start';
+};
+
 const reversedEarnings = computed(() => {
   return [...props.earnings].reverse()
 })
@@ -29,7 +34,11 @@ const reversedEarnings = computed(() => {
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-lg font-semibold text-slate-800">Earnings History</h2>
       <div class="flex gap-4 text-xs">
-        <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span> Actual</div>
+        <div class="flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full"
+            :class="reversedEarnings.some(e => e.actual < 0) ? 'bg-red-500' : 'bg-blue-500'"></span>
+          Actual
+        </div>
         <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-gray-300"></span> Estimate</div>
       </div>
     </div>
@@ -37,12 +46,23 @@ const reversedEarnings = computed(() => {
     <div class="flex-1 flex items-end justify-between gap-2 min-h-50 pt-4">
       <div v-for="item in reversedEarnings" :key="item.period" class="flex flex-col items-center w-full group">
 
-        <div class="flex items-end gap-1 h-32 w-full justify-center relative">
-          <div class="w-3 md:w-6 bg-gray-300 rounded-t-sm transition-all duration-500 relative group-hover:bg-gray-400"
-            :style="{ height: getHeight(item.estimate) }">
+        <div class="flex gap-1 h-32 w-full justify-center relative items-center">
+          <div class="w-4 sm:w-3 md:w-6 bg-gray-300 transition-all duration-500 relative"
+            :class="[
+              item.estimate >= 0 ? 'rounded-t-sm' : 'rounded-b-sm'
+            ]"
+            :style="{
+              height: getHeight(item.estimate),
+              alignSelf: getBarAlignSelf(item.estimate)
+            }">
           </div>
-          <div class="w-3 md:w-6 bg-blue-500 rounded-t-sm transition-all duration-500 relative group-hover:bg-blue-600"
-            :style="{ height: getHeight(item.actual) }">
+          <div class="w-4 sm:w-3 md:w-6 transition-all duration-500 relative" :class="[
+            item.actual >= 0 ? 'bg-blue-500 rounded-t-sm' : 'bg-red-500 rounded-b-sm',
+            item.actual < 0 ? 'order-2' : 'order-1'
+          ]" :style="{
+              height: getHeight(item.actual),
+              alignSelf: getBarAlignSelf(item.actual)
+            }">
           </div>
         </div>
 
