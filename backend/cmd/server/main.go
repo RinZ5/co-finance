@@ -189,6 +189,23 @@ func main() {
 		ctx.JSON(http.StatusOK, news)
 	})
 
+	r.GET("/api/market-status", func(ctx *gin.Context) {
+		exchange := ctx.Query("exchange")
+
+		if exchange == "" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Exchange parametes is required"})
+			return
+		}
+
+		market, err := client.GetMarketStatus(exchange)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, market)
+	})
+
 	log.Println("Server running on http://localhost:8080")
 	if err := r.Run(":8080"); err != nil {
 		log.Fatal("Failed to start server:", err)

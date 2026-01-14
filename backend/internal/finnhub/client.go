@@ -157,7 +157,7 @@ func (c *Client) GetCompanyNews(symbol, from, to string) ([]models.CompanyNews, 
 }
 
 func (c *Client) GetMarketStatus(market string) (*models.MarketStatus, error) {
-	url := fmt.Sprintf("%s/stock/market-status?exchange=%s", c.BaseURL, market)
+	url := fmt.Sprintf("%s/stock/market-status?exchange=%s&token=%s", c.BaseURL, market, c.ApiKey)
 
 	resp, err := c.HTTPClient.Get(url)
 	if err != nil {
