@@ -125,31 +125,30 @@ watch(
       <StockHeader :quote="dashboardData.quote" :profile="dashboardData.financials"
         :marketStatus="marketStore.marketStatus" />
 
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
 
-        <div class="xl:col-span-1">
+        <div class="xl:col-span-1 self-start">
           <KeyStats :financials="dashboardData.financials" />
         </div>
 
         <div :class="[
           'flex flex-col gap-6',
-          dashboardData.insiders && dashboardData.insiders.length > 0 
-            ? 'md:col-span-2 xl:col-span-2' 
-            : 'md:col-span-3 xl:col-span-3'
+          dashboardData.insiders && dashboardData.insiders.length > 0
+            ? 'xl:col-span-2'
+            : 'xl:col-span-3'
         ]">
           <NewsFeed :news="companyNews" />
+
           <EarningsChart v-if="dashboardData.earnings && dashboardData.earnings.length > 0"
             :earnings="dashboardData.earnings" />
         </div>
 
-        <div v-if="dashboardData.insiders && dashboardData.insiders.length > 0" class="xl:col-span-1 flex flex-col gap-6">
+        <div class="xl:col-span-1 flex flex-col gap-6">
           <RecTrends :trend="dashboardData.recommendations" />
-          <div class="h-fit">
+
+          <div v-if="dashboardData.insiders && dashboardData.insiders.length > 0" class="h-fit">
             <InsiderTable :transactions="dashboardData.insiders" />
           </div>
-        </div>
-        <div v-else class="xl:col-span-1 flex flex-col gap-6">
-          <RecTrends :trend="dashboardData.recommendations" />
         </div>
 
       </div>

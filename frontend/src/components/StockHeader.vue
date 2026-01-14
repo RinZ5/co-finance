@@ -24,10 +24,20 @@ const marketTime = computed(() => {
 })
 
 const marketLabel = computed(() => {
-  if (!props.marketStatus) return 'Market status unavailable'
-  if (props.marketStatus.holiday) return 'Holiday'
-  return props.marketStatus.session.replace('-', ' ')
+  const status = props.marketStatus
+  if (!status) return '-'
+  if (status.holiday) return 'Holiday'
+
+  const sessionMap: Record<MarketStatus['session'], string> = {
+    regular: 'Open',
+    'pre-market': 'Pre-Market',
+    'post-market': 'Post-Market',
+    closed: 'Closed'
+  }
+
+  return sessionMap[status.session]
 })
+
 
 const badgeClass = computed(() => {
   if (!props.marketStatus) {
@@ -61,7 +71,7 @@ onMounted(() => {
     <div>
       <div class="flex items-center gap-2">
         <h1 class="text-3xl font-bold text-slate-900">{{ profile.symbol }}</h1>
-        <span class="px-2 py-0.5 rounded text-xs font-semibold bg-gray-200 text-gray-600">US Market</span>
+        <!-- <span class="px-2 py-0.5 rounded text-xs font-semibold bg-gray-200 text-gray-600">US Market</span> -->
         <span class="px-2 py-0.5 rounded text-xs font-semibold" :class="badgeClass">
           {{ marketLabel }}
         </span>
