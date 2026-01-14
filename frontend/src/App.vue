@@ -12,10 +12,12 @@ import RecTrends from './components/RecTrends.vue';
 import InsiderTable from './components/InsiderTable.vue';
 import NewsFeed from './components/NewsFeed.vue';
 import { useStockStore } from './stores/stock.ts';
+import { useMarketStore } from './stores/market.ts';
 
 NProgress.configure({ showSpinner: false })
 
 const store = useStockStore();
+const marketStore = useMarketStore()
 
 const dashboardData = ref<DashboardData | null>(null);
 const companyNews = ref<CompanyNews[]>([]);
@@ -76,7 +78,9 @@ const fetchData = async () => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
+  await marketStore.fetchMarketStatus('US')
+  marketStore.startHourlySync('US')
   fetchData();
 });
 
@@ -118,7 +122,8 @@ watch(
 
     <div v-else-if="dashboardData" class="w-full h-full p-4 md:p-6 space-y-6 animate-fade-in-up">
 
-      <StockHeader :quote="dashboardData.quote" :profile="dashboardData.financials" />
+      <StockHeader :quote="dashboardData.quote" :profile="dashboardData.financials"
+        :marketStatus="marketStore.marketStatus" />
 
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
 

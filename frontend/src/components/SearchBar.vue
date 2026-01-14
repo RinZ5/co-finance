@@ -1,9 +1,16 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useStockStore } from '../stores/stock';
 
 const store = useStockStore();
-const searchQuery = ref('');
+const rawQuery = ref('')
+
+const searchQuery = computed({
+  get: () => rawQuery.value,
+  set: (val: string) => {
+    rawQuery.value = val.toUpperCase()
+  }
+})
 
 const handleSubmit = () => {
   if (searchQuery.value.trim()) {

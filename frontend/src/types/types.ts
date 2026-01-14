@@ -79,3 +79,12 @@ export interface CompanyNews {
   summary: string;
   url: string;
 }
+
+export interface MarketStatus {
+  exchange: string
+  holiday: string | null
+  isOpen: boolean
+  session: 'regular' | 'pre-market' | 'post-market' | 'closed'
+  t: number
+  timezone: string
+}
