@@ -11,6 +11,22 @@ const recentTransactions = computed(() => {
     .sort((a, b) => new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime())
     .slice(0, 5);
 });
+
+const formatYMDToReadable = (date: string) => {
+  const parts = date.split('-')
+
+  if (parts.length !== 3) return date
+
+  const y = Number(parts[0])
+  const m = Number(parts[1])
+  const d = Number(parts[2])
+
+  return new Date(y, m - 1, d).toLocaleDateString('en-US', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  })
+}
 </script>
 
 <template>
@@ -29,7 +45,7 @@ const recentTransactions = computed(() => {
         <tbody class="divide-y divide-gray-100">
           <tr v-for="(t, index) in recentTransactions" :key="index" class="hover:bg-gray-50/50">
             <td class="px-4 py-3 font-medium text-slate-800">{{ t.name }}</td>
-            <td class="px-4 py-3 whitespace-nowrap">{{ t.transactionDate }}</td>
+            <td class="px-4 py-3 whitespace-nowrap">{{ formatYMDToReadable(t.transactionDate) }}</td>
             <td class="px-4 py-3">
               <span :class="t.change > 0 ? 'text-green-600' : 'text-red-600'">
                 {{ t.change > 0 ? '+' : '' }}{{ t.change.toLocaleString() }}
