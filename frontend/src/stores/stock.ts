@@ -8,19 +8,17 @@ export const useStockStore = defineStore('stock', () => {
   const threeDaysAgo = new Date();
   threeDaysAgo.setDate(today.getDate() - 3);
 
-  const newsFrom = ref<Date>(threeDaysAgo);
-  const newsTo = ref<Date>(today);
+  const newsRange = ref<[Date, Date]>([threeDaysAgo, today])
 
   function setSymbol(newSymbol: string) {
-    if (newSymbol && typeof newSymbol === 'string') {
+    if (newSymbol) {
       symbol.value = newSymbol.toUpperCase();
     }
   }
 
   function setDateRange(from: Date, to: Date) {
-    newsFrom.value = from;
-    newsTo.value = to;
+    newsRange.value = [from, to]
   }
 
-  return { symbol, newsFrom, newsTo, setSymbol, setDateRange };
+  return { symbol, newsRange, setSymbol, setDateRange };
 });

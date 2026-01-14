@@ -10,8 +10,8 @@ import (
 	"github.com/joho/godotenv"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/rinz5/stock-tracker/backend/internal/finnhub"
-	"github.com/rinz5/stock-tracker/backend/internal/models"
+	"github.com/rinz5/co-finance/backend/internal/finnhub"
+	"github.com/rinz5/co-finance/backend/internal/models"
 )
 
 type DashboardResponse struct {

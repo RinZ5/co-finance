@@ -1,4 +1,4 @@
-module github.com/rinz5/stock-tracker/backend
+module github.com/rinz5/co-finance/backend
 
 go 1.24.4
 

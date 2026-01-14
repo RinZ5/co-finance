@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/rinz5/stock-tracker/backend/internal/models"
+	"github.com/rinz5/co-finance/backend/internal/models"
 )
 
 const DefaultBaseURL = "https://finnhub.io/api/v1"

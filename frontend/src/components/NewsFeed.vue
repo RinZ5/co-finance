@@ -27,37 +27,38 @@ const startOfDay = (date: Date) =>
 const endOfDay = (date: Date) =>
   new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
 
-const isWithinRange = (unix: number) => {
-  const d = new Date(unix * 1000);
-  return (
-    d >= startOfDay(store.newsFrom) &&
-    d <= endOfDay(store.newsTo)
-  );
-};
+const filteredNews = computed(() => {
+  if (!store.newsRange || store.newsRange.length !== 2) {
+    return props.news
+  }
 
-const filteredNews = computed(() =>
-  props.news.filter(n => isWithinRange(n.datetime))
-);
+  const [from, to] = store.newsRange
+  const start = startOfDay(from)
+  const end = endOfDay(to)
 
+  return props.news.filter(item => {
+    const d = new Date(item.datetime * 1000)
+    return d >= start && d <= end
+  })
+})
 </script>
 
 <template>
   <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 h-full flex flex-col">
 
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 border-b border-gray-100 pb-4">
-      <h2 class="text-lg font-semibold text-slate-800">Company News</h2>
+      <h2 class="text-lg font-semibold text-slate-800 shrink-0">
+        Company News
+      </h2>
 
-      <div class="flex gap-2">
+      <div class="flex-1">
         <div class="flex flex-col">
-          <label class="text-[10px] text-gray-400 font-medium ml-1">From</label>
-          <VueDatePicker v-model="store.newsFrom" :enable-time-picker="false" auto-apply format="yyyy-MM-dd"
-            class="text-xs" />
-        </div>
+          <label class="text-[10px] text-gray-400 font-medium ml-1">
+            Date range
+          </label>
 
-        <div class="flex flex-col">
-          <label class="text-[10px] text-gray-400 font-medium ml-1">To</label>
-          <VueDatePicker v-model="store.newsTo" :enable-time-picker="false" auto-apply format="yyyy-MM-dd"
-            class="text-xs" />
+          <VueDatePicker v-model="store.newsRange" range :enable-time-picker="false" :time-picker="false" auto-apply
+            format="dd MMM yyyy" class="text-xs w-full" />
         </div>
       </div>
     </div>
@@ -65,9 +66,7 @@ const filteredNews = computed(() =>
     <div class="overflow-y-auto pr-2 custom-scrollbar flex-1 max-h-[600px] space-y-4">
 
       <div v-if="news.length === 0" class="text-gray-400 text-sm text-center py-10">
-        No news found between <br>
-        <span class="font-medium text-gray-500">{{ store.newsFrom }}</span> and <span
-          class="font-medium text-gray-500">{{ store.newsTo }}</span>.
+        No news found in selected range
       </div>
 
       <a v-for="item in filteredNews" :key="item.id" :href="item.url" target="_blank" rel="noopener noreferrer"

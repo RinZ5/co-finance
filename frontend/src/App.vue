@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, watch, computed, triggerRef } from 'vue';
 import type { CompanyNews, DashboardData } from './types/types.ts';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
@@ -21,18 +21,15 @@ const dashboardData = ref<DashboardData | null>(null);
 const companyNews = ref<CompanyNews[]>([]);
 const error = ref<string | null>(null);
 
-const apiFrom = computed(() =>
-  store.newsFrom
-    ? store.newsFrom.toISOString().split('T')[0]
-    : ''
-);
+const apiFrom = computed(() => {
+  const [from] = store.newsRange
+  return from.toISOString().split('T')[0]
+})
 
-const apiTo = computed(() =>
-  store.newsTo
-    ? store.newsTo.toISOString().split('T')[0]
-    : ''
-);
-
+const apiTo = computed(() => {
+  const [, to] = store.newsRange
+  return to.toISOString().split('T')[0]
+})
 
 const fetchData = async () => {
   NProgress.start();
@@ -78,8 +75,9 @@ watch(
 );
 
 watch(
-  [() => store.newsFrom, () => store.newsTo],
-  () => fetchData()
+  [() => store.newsRange],
+  () => fetchData(),
+  { deep: true }
 );
 </script>
 
@@ -88,7 +86,7 @@ watch(
 
     <div class="w-full px-4 md:px-6 py-4 flex justify-between items-center bg-white border-b border-gray-100">
       <div class="font-bold text-xl tracking-tight text-slate-800">
-        FinDash
+        Co-Finance
       </div>
       <SearchBar />
     </div>
