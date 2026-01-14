@@ -29,7 +29,7 @@ type DashboardResponse struct {
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error: .evn file is not found or could not be loaded.")
+		log.Println("Warning: .env file not found, using environment variables")
 	}
 
 	apiKey := os.Getenv("FINNHUB_API_KEY")
