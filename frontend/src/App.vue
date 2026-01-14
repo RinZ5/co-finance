@@ -126,9 +126,10 @@ watch(
         :marketStatus="marketStore.marketStatus" />
 
       <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
-
-        <div class="xl:col-span-1 self-start">
+        <div class="xl:col-span-1 flex flex-col gap-6 self-start">
           <KeyStats :financials="dashboardData.financials" />
+          <EarningsChart v-if="dashboardData.earnings && dashboardData.earnings.length > 0"
+            :earnings="dashboardData.earnings" />
         </div>
 
         <div :class="[
@@ -138,14 +139,10 @@ watch(
             : 'xl:col-span-3'
         ]">
           <NewsFeed :news="companyNews" />
-
-          <EarningsChart v-if="dashboardData.earnings && dashboardData.earnings.length > 0"
-            :earnings="dashboardData.earnings" />
         </div>
 
         <div class="xl:col-span-1 flex flex-col gap-6">
           <RecTrends :trend="dashboardData.recommendations" />
-
           <div v-if="dashboardData.insiders && dashboardData.insiders.length > 0" class="h-fit">
             <InsiderTable :transactions="dashboardData.insiders" />
           </div>
