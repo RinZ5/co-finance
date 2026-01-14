@@ -92,3 +92,12 @@ type CompanyNews struct {
 	Summary  string `json:"summary"`
 	Url      string `json:"url"`
 }
+
+type MarketStatus struct {
+	Exchange  string  `json:"exchange"`
+	Holiday   *string `json:"holiday"`
+	IsOpen    bool    `json:"isOpen"`
+	Session   *string `json:"session"`
+	Timestamp int64   `json:"t"`
+	Timezone  string  `json:"timezone"`
+}

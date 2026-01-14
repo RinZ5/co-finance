@@ -145,7 +145,7 @@ func (c *Client) GetCompanyNews(symbol, from, to string) ([]models.CompanyNews, 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API error: %s", resp.Status)
+		return nil, fmt.Errorf("API error: status %d", resp.StatusCode)
 	}
 
 	var news []models.CompanyNews
@@ -154,4 +154,25 @@ func (c *Client) GetCompanyNews(symbol, from, to string) ([]models.CompanyNews, 
 	}
 
 	return news, nil
+}
+
+func (c *Client) GetMarketStatus(market string) (*models.MarketStatus, error) {
+	url := fmt.Sprintf("%s/stock/market-status?exchange=%s", c.BaseURL, market)
+
+	resp, err := c.HTTPClient.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API error: status %d", resp.StatusCode)
+	}
+
+	var marketStatus models.MarketStatus
+	if err := json.NewDecoder(resp.Body).Decode(&marketStatus); err != nil {
+		return nil, err
+	}
+
+	return &marketStatus, nil
 }

@@ -355,3 +355,55 @@ func TestGetCompanyNews(t *testing.T) {
 		t.Errorf("Expected datetime 1569550360, got %d", item.Datetime)
 	}
 }
+
+func TestGetMarketStatus(t *testing.T) {
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/stock/market-status" {
+			t.Errorf("Expected path /stock/market-status, got %s", r.URL.Path)
+		}
+
+		if r.URL.Query().Get("exchange") != "US" {
+			t.Errorf("Expected exchange US, got %s", r.URL.Query().Get("exchange"))
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{
+			"exchange": "US",
+			"holiday": null,
+			"isOpen": false,
+			"session": "pre-market",
+			"timezone": "America/New_York",
+			"t": 1697018041
+		}`))
+	}))
+	defer mockServer.Close()
+
+	client := NewClient("fake-key")
+	client.BaseURL = mockServer.URL
+
+	status, err := client.GetMarketStatus("US")
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	if status.Exchange != "US" {
+		t.Errorf("Expected exchange US, got %s", status.Exchange)
+	}
+
+	if status.IsOpen != false {
+		t.Errorf("Expected isOpen false, got %v", status.IsOpen)
+	}
+
+	if status.Session == nil || *status.Session != "pre-market" {
+		t.Errorf("Expected session 'pre-market', got %v", status.Session)
+	}
+
+	if status.Holiday != nil {
+		t.Errorf("Expected holiday to be nil, got %v", *status.Holiday)
+	}
+
+	if status.Timestamp != 1697018041 {
+		t.Errorf("Expected timestamp 1697018041, got %d", status.Timestamp)
+	}
+}
