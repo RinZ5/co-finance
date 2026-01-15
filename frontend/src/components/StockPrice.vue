@@ -56,7 +56,7 @@ onMounted(() => {
     </div>
 
     <div :class="changeClasses">
-      <span>{{ isPositive ? '+' : '' }}{{ change.toFixed(2) }}</span>
+      <span>{{ isPositive ? '+' : '-' }}${{ Math.abs(change).toFixed(2) }}</span>
 
       <span v-if="variant === 'desktop'" :class="percentBadgeClasses">
         {{ isPositive ? '+' : '' }}{{ percent.toFixed(2) }}%
