@@ -23,7 +23,7 @@ const searchQuery = computed({
 });
 
 const placeholder = computed(() => {
-  return error.value || 'Search ticker (e.g. NVDA)...';
+  return error.value || 'Search ticker (e.g. NVDA)';
 });
 
 const handleSubmit = () => {
@@ -47,16 +47,17 @@ const handleSubmit = () => {
 </script>
 
 <template>
-  <form @submit.prevent="handleSubmit" class="relative group w-full max-w-xs">
+  <form @submit.prevent="handleSubmit" class="relative group ">
     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-      <svg class="h-4 w-4 text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg class="h-4 w-4 text-on-surface-tertiary transition-colors" fill="none" viewBox="0 0 24 24"
+        stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
           d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
       </svg>
     </div>
 
     <input v-model="searchQuery" type="text" :placeholder="placeholder"
-      class="w-full bg-white border text-gray-700 text-sm rounded-lg block pl-10 p-2.5 shadow-sm transition-all outline-none focus:outline-none focus:ring-0"
-      :class="error ? 'border-red-500' : 'border-gray-200'" />
+      class="w-full bg-surface border text-on-surface text-sm rounded-lg block pl-10 p-2.5 shadow-sm transition-all outline-none focus:outline-none focus:ring-0"
+      :class="error ? 'border-error' : 'border-border'" />
   </form>
 </template>

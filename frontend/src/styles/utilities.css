@@ -1,0 +1,62 @@
+@utility content-auto {
+  content-visibility: auto;
+}
+
+@utility scrollbar-hide {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility glass-morphism {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+@utility text-gradient {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+@utility positive-change {
+  color: var(--color-accent);
+}
+
+@utility negative-change {
+  color: var(--color-error);
+}
+
+@utility price-up {
+  @apply positive-change font-medium;
+}
+
+@utility price-down {
+  @apply negative-change font-medium;
+}
+
+@utility price-neutral {
+  @apply text-on-surface-secondary;
+}
+
+@utility market-open {
+  @apply text-accent;
+}
+
+@utility market-closed {
+  @apply text-on-surface-tertiary;
+}
+
+@utility trend-up {
+  @apply inline-flex items-center gap-1 text-accent;
+}
+
+@utility trend-down {
+  @apply inline-flex items-center gap-1 text-error;
+}
+
+@utility trend-neutral {
+  @apply inline-flex items-center gap-1 text-on-surface-secondary;
+}

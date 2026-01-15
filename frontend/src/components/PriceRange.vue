@@ -46,7 +46,7 @@ const prevClosePosition = computed(() => {
 </script>
 
 <template>
-  <div class="hidden md:flex grow max-w-md px-8 flex-col justify-center">
+  <div class="hidden md:flex w-full px-8 flex-col justify-center">
     <div class="text-xs text-gray-500 mb-2 font-medium">
       Today's Range
     </div>

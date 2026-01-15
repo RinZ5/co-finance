@@ -10,32 +10,32 @@ const formatCurrency = (val: number) =>
 </script>
 
 <template>
-  <div class="md:hidden mt-4 pt-4 border-t border-gray-100
+  <div class="md:hidden mt-4 pt-4 border-t border-border-light
            grid grid-cols-2 gap-x-6 gap-y-3 text-xs">
     <div class="flex justify-between">
-      <span class="text-gray-500">Open</span>
-      <span class="font-medium text-slate-800">
+      <span class="text-on-surface-tertiary">Open</span>
+      <span class="font-medium text-on-surface">
         {{ formatCurrency(quote.o) }}
       </span>
     </div>
 
     <div class="flex justify-between">
-      <span class="text-gray-500">High</span>
-      <span class="font-medium text-slate-800">
+      <span class="text-on-surface-tertiary">High</span>
+      <span class="font-medium text-on-surface">
         {{ formatCurrency(quote.h) }}
       </span>
     </div>
 
     <div class="flex justify-between">
-      <span class="text-gray-500">Low</span>
-      <span class="font-medium text-slate-800">
+      <span class="text-on-surface-tertiary">Low</span>
+      <span class="font-medium text-on-surface">
         {{ formatCurrency(quote.l) }}
       </span>
     </div>
 
     <div class="flex justify-between">
-      <span class="text-gray-500">Prev Close</span>
-      <span class="font-medium text-slate-800">
+      <span class="text-on-surface-tertiary">Prev Close</span>
+      <span class="font-medium text-on-surface">
         {{ formatCurrency(quote.pc) }}
       </span>
     </div>

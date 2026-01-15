@@ -1,0 +1,53 @@
+@theme {
+  /* Typography System */
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-heading: "Satoshi", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  
+  /* Responsive Breakpoints */
+  --breakpoint-xs: 20rem;  /* 320px */
+  --breakpoint-sm: 24rem;  /* 384px */
+  --breakpoint-md: 28rem;  /* 448px */
+  --breakpoint-lg: 32rem;  /* 512px */
+  
+  /* Color System (Light Theme + OKLCH) */
+  --color-surface: var(--color-white);
+  --color-surface-secondary: var(--color-neutral-50);
+  --color-surface-tertiary: var(--color-neutral-100);
+  --color-on-surface: var(--color-neutral-900);
+  --color-on-surface-secondary: var(--color-neutral-600);
+  --color-on-surface-tertiary: var(--color-neutral-500);
+  --color-primary: var(--color-blue-600);
+  --color-primary-hover: var(--color-blue-700);
+  --color-primary-light: var(--color-blue-50);
+  --color-secondary: var(--color-gray-600);
+  --color-accent: var(--color-green-600);
+  --color-error: var(--color-red-600);
+  --color-warning: var(--color-yellow-500);
+  --color-border: var(--color-neutral-200);
+  --color-border-light: var(--color-neutral-100);
+  
+  /* Spacing Scale */
+  --spacing-xs: 0.25rem;   /* 4px */
+  --spacing-sm: 0.5rem;    /* 8px */
+  --spacing-md: 1rem;      /* 16px */
+  --spacing-lg: 1.5rem;    /* 24px */
+  --spacing-xl: 2rem;      /* 32px */
+  --spacing-2xl: 3rem;     /* 48px */
+  
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --shadow-brand: 0 10px 25px -5px oklch(0.65 0.18 220 / 0.25);
+  
+  /* Animation */
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-brand: cubic-bezier(0.3, 0, 0, 1);
+}

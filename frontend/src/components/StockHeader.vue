@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { StockQuote, BasicFinancials, MarketStatus } from '../types/types.ts'
+import BaseCard from './base/BaseCard.vue'
 import StockSymbol from './StockSymbol.vue'
 import StockPrice from './StockPrice.vue'
 import StockStats from './StockStats.vue'
@@ -14,8 +15,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6
-              grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+  <BaseCard class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
 
     <div class="md:col-span-4 flex flex-col gap-4">
       <div class="flex justify-between gap-4">
@@ -27,9 +27,9 @@ const props = defineProps<{
       <StockStats :quote="quote" />
     </div>
 
-    <div class="md:col-span-8 hidden md:flex items-center gap-3 pl-6 border-l border-gray-100 h-full">
+    <div class="md:col-span-8 hidden md:flex items-stretch gap-6 pl-6 border-l border-border-light h-full">
 
-      <div class="grow min-w-0">
+      <div class="grow min-w-0 pr-40">
         <PriceRange :quote="quote" />
       </div>
 
@@ -39,5 +39,5 @@ const props = defineProps<{
 
     </div>
 
-  </div>
+  </BaseCard>
 </template>

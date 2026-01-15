@@ -104,12 +104,18 @@ watch(
 <template>
   <div class="min-h-screen w-full bg-gray-50 text-slate-800 font-sans">
 
-    <div class="w-full px-4 md:px-6 py-4 flex justify-between items-center bg-white border-b border-gray-100">
-      <div class="font-bold text-xl tracking-tight text-slate-800">
+    <div class="w-full px-4 md:px-6 py-4 flex items-center justify-between bg-surface border-b border-border-light">
+      <div class="font-bold text-xl shrink-0">
         Co-Finance
       </div>
-      <SearchBar />
+
+      <div class="w-full md:w-80 md:block sm:pl-6">
+        <SearchBar />
+      </div>
+
     </div>
+
+
 
     <div v-if="error" class="flex h-screen items-center justify-center">
       <div class="bg-red-50 text-red-600 px-6 py-4 rounded-xl border border-red-100 text-center">
