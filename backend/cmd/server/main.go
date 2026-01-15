@@ -18,6 +18,8 @@ import (
 	ws "github.com/gorilla/websocket"
 )
 
+const ErrSymbolRequired = "Symbol is required"
+
 type DashboardResponse struct {
 	Quote           *models.StockQuote           `json:"quote"`
 	Financials      *models.BasicFinancials      `json:"financials"`
@@ -26,7 +28,13 @@ type DashboardResponse struct {
 	Insiders        []models.InsiderTransaction  `json:"insiders"`
 }
 
-func main() {
+type Server struct {
+	hub      *websocket.Hub
+	streamer *finnhub.StreamClient
+	client   *finnhub.Client
+}
+
+func initializeEnvironment() string {
 	err := godotenv.Load()
 	if err != nil {
 		log.Println("Warning: .env file not found, using environment variables")
@@ -37,6 +45,10 @@ func main() {
 		log.Fatal("Error: FINNHUB_API_KEY is not set.")
 	}
 
+	return apiKey
+}
+
+func setupServer(apiKey string) *Server {
 	hub := websocket.NewHub()
 	go hub.Run()
 
@@ -45,17 +57,21 @@ func main() {
 
 	client := finnhub.NewClient(apiKey)
 
-	r := gin.Default()
+	return &Server{
+		hub:      hub,
+		streamer: streamer,
+		client:   client,
+	}
+}
 
+func setupOrigins() (map[string]bool, []string) {
 	rawOrigins := os.Getenv("ALLOWED_ORIGINS")
-
-	wsAllowedOrigins := make(map[string]bool)
-
-	var corsAllowedOrigins []string
-
 	if rawOrigins == "" {
 		rawOrigins = "http://localhost:5173,http://127.0.0.1:5173"
 	}
+
+	wsAllowedOrigins := make(map[string]bool)
+	var corsAllowedOrigins []string
 
 	for origin := range strings.SplitSeq(rawOrigins, ",") {
 		cleanOrigin := strings.TrimSpace(origin)
@@ -67,17 +83,11 @@ func main() {
 		corsAllowedOrigins = append(corsAllowedOrigins, cleanOrigin)
 	}
 
-	r.GET("/ws", func(ctx *gin.Context) {
-		// var upgrader = ws.Upgrader{
-		// 	CheckOrigin: func(r *http.Request) bool {
-		// 		origin := r.Header.Get("Origin")
-		//
-		// 		log.Printf(" DEBUG: Incoming Connection from Origin: [%s]", origin)
-		//
-		// 		return true
-		// 	},
-		// }
+	return wsAllowedOrigins, corsAllowedOrigins
+}
 
+func (s *Server) setupWebSocketHandler(wsAllowedOrigins map[string]bool) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
 		var upgrader = ws.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
 				origin := r.Header.Get("Origin")
@@ -97,10 +107,10 @@ func main() {
 			return
 		}
 
-		hub.Register <- conn
+		s.hub.Register <- conn
 
 		defer func() {
-			hub.Unregister <- conn
+			s.hub.Unregister <- conn
 			conn.Close()
 		}()
 
@@ -116,179 +126,207 @@ func main() {
 
 			if msg.Type == "subscribe" && msg.Symbol != "" {
 				log.Printf("Frontend requested subscription to: %s", msg.Symbol)
-				streamer.Subscribe(msg.Symbol)
+				s.streamer.Subscribe(msg.Symbol)
 			}
 		}
+	}
+}
+
+func (s *Server) validateSymbol(ctx *gin.Context) (string, bool) {
+	symbol := ctx.Query("symbol")
+	if symbol == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": ErrSymbolRequired})
+		return "", false
+	}
+	return symbol, true
+}
+
+func (s *Server) handleQuote(ctx *gin.Context) {
+	symbol, ok := s.validateSymbol(ctx)
+	if !ok {
+		return
+	}
+
+	quote, err := s.client.GetQuote(symbol)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, quote)
+}
+
+func (s *Server) handleFinancials(ctx *gin.Context) {
+	symbol, ok := s.validateSymbol(ctx)
+	if !ok {
+		return
+	}
+
+	financials, err := s.client.GetBasicFinancials(symbol)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, financials)
+}
+
+func (s *Server) handleEarnings(ctx *gin.Context) {
+	symbol, ok := s.validateSymbol(ctx)
+	if !ok {
+		return
+	}
+
+	earnings, err := s.client.GetEarnings(symbol)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, earnings)
+}
+
+func (s *Server) handleRecommendations(ctx *gin.Context) {
+	symbol, ok := s.validateSymbol(ctx)
+	if !ok {
+		return
+	}
+
+	recommendations, err := s.client.GetRecommendations(symbol)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, recommendations)
+}
+
+func (s *Server) handleInsider(ctx *gin.Context) {
+	symbol, ok := s.validateSymbol(ctx)
+	if !ok {
+		return
+	}
+
+	transactions, err := s.client.GetInsiderTransactions(symbol)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, transactions)
+}
+
+func (s *Server) handleDashboard(ctx *gin.Context) {
+	symbol, ok := s.validateSymbol(ctx)
+	if !ok {
+		return
+	}
+
+	var res DashboardResponse
+
+	g, _ := errgroup.WithContext(ctx.Request.Context())
+
+	g.Go(func() error {
+		var err error
+		res.Quote, err = s.client.GetQuote(symbol)
+		return err
 	})
+
+	g.Go(func() error {
+		var err error
+		res.Financials, err = s.client.GetBasicFinancials(symbol)
+		return err
+	})
+
+	g.Go(func() error {
+		var err error
+		res.Earnings, err = s.client.GetEarnings(symbol)
+		return err
+	})
+
+	g.Go(func() error {
+		var err error
+		res.Recommendations, err = s.client.GetRecommendations(symbol)
+		return err
+	})
+
+	g.Go(func() error {
+		var err error
+		res.Insiders, err = s.client.GetInsiderTransactions(symbol)
+		return err
+	})
+
+	if err := g.Wait(); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch dashboard data: " + err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, res)
+}
+
+func (s *Server) handleCompanyNews(ctx *gin.Context) {
+	symbol := ctx.Query("symbol")
+	from := ctx.Query("from")
+	to := ctx.Query("to")
+
+	if symbol == "" || from == "" || to == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Symbol, from, and to parameters are required"})
+		return
+	}
+
+	news, err := s.client.GetCompanyNews(symbol, from, to)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, news)
+}
+
+func (s *Server) handleMarketStatus(ctx *gin.Context) {
+	exchange := ctx.Query("exchange")
+
+	if exchange == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Exchange parametes is required"})
+		return
+	}
+
+	market, err := s.client.GetMarketStatus(exchange)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, market)
+}
+
+func (s *Server) setupRoutes(r *gin.Engine) {
+	wsAllowedOrigins, _ := setupOrigins()
+
+	r.GET("/ws", s.setupWebSocketHandler(wsAllowedOrigins))
+	r.GET("/api/quote", s.handleQuote)
+	r.GET("/api/financials", s.handleFinancials)
+	r.GET("/api/earnings", s.handleEarnings)
+	r.GET("/api/recommendations", s.handleRecommendations)
+	r.GET("/api/insider", s.handleInsider)
+	r.GET("/api/dashboard", s.handleDashboard)
+	r.GET("/api/company-news", s.handleCompanyNews)
+	r.GET("/api/market-status", s.handleMarketStatus)
+}
+
+func main() {
+	apiKey := initializeEnvironment()
+	server := setupServer(apiKey)
+
+	r := gin.Default()
+
+	_, corsAllowedOrigins := setupOrigins()
 
 	config := cors.DefaultConfig()
 	config.AllowOrigins = corsAllowedOrigins
 	r.Use(cors.New(config))
 
-	r.GET("/api/quote", func(ctx *gin.Context) {
-		symbol := ctx.Query("symbol")
-		if symbol == "" {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Symbol is required"})
-			return
-		}
-
-		quote, err := client.GetQuote(symbol)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		ctx.JSON(http.StatusOK, quote)
-	})
-
-	r.GET("/api/financials", func(ctx *gin.Context) {
-		symbol := ctx.Query("symbol")
-		if symbol == "" {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Symbol is required"})
-			return
-		}
-
-		financials, err := client.GetBasicFinancials(symbol)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		ctx.JSON(http.StatusOK, financials)
-	})
-
-	r.GET("/api/earnings", func(ctx *gin.Context) {
-		symbol := ctx.Query("symbol")
-		if symbol == "" {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Symbol is required"})
-			return
-		}
-
-		earnings, err := client.GetEarnings(symbol)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		ctx.JSON(http.StatusOK, earnings)
-	})
-
-	r.GET("/api/recommendations", func(ctx *gin.Context) {
-		symbol := ctx.Query("symbol")
-		if symbol == "" {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Symbol is required"})
-			return
-		}
-
-		recommendations, err := client.GetRecommendations(symbol)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		ctx.JSON(http.StatusOK, recommendations)
-	})
-
-	r.GET("/api/insider", func(ctx *gin.Context) {
-		symbol := ctx.Query("symbol")
-		if symbol == "" {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Symbol is required"})
-			return
-		}
-
-		transactions, err := client.GetInsiderTransactions(symbol)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		ctx.JSON(http.StatusOK, transactions)
-	})
-
-	r.GET("/api/dashboard", func(ctx *gin.Context) {
-		symbol := ctx.Query("symbol")
-		if symbol == "" {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Symbol is required"})
-			return
-		}
-
-		var res DashboardResponse
-
-		g, _ := errgroup.WithContext(ctx.Request.Context())
-
-		g.Go(func() error {
-			var err error
-			res.Quote, err = client.GetQuote(symbol)
-			return err
-		})
-
-		g.Go(func() error {
-			var err error
-			res.Financials, err = client.GetBasicFinancials(symbol)
-			return err
-		})
-
-		g.Go(func() error {
-			var err error
-			res.Earnings, err = client.GetEarnings(symbol)
-			return err
-		})
-
-		g.Go(func() error {
-			var err error
-			res.Recommendations, err = client.GetRecommendations(symbol)
-			return err
-		})
-
-		g.Go(func() error {
-			var err error
-			res.Insiders, err = client.GetInsiderTransactions(symbol)
-			return err
-		})
-
-		if err := g.Wait(); err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch dashboard data: " + err.Error()})
-			return
-		}
-
-		ctx.JSON(http.StatusOK, res)
-	})
-
-	r.GET("/api/company-news", func(ctx *gin.Context) {
-		symbol := ctx.Query("symbol")
-		from := ctx.Query("from")
-		to := ctx.Query("to")
-
-		if symbol == "" || from == "" || to == "" {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Symbol, from, and to parameters are required"})
-			return
-		}
-
-		news, err := client.GetCompanyNews(symbol, from, to)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		ctx.JSON(http.StatusOK, news)
-	})
-
-	r.GET("/api/market-status", func(ctx *gin.Context) {
-		exchange := ctx.Query("exchange")
-
-		if exchange == "" {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Exchange parametes is required"})
-			return
-		}
-
-		market, err := client.GetMarketStatus(exchange)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		ctx.JSON(http.StatusOK, market)
-	})
+	server.setupRoutes(r)
 
 	log.Println("Server running on http://localhost:8080")
 	if err := r.Run(":8080"); err != nil {
