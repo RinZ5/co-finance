@@ -27,11 +27,10 @@ const marketLabel = computed(() => {
   const sessionMap: Record<MarketStatus['session'], string> = {
     regular: 'Open',
     'pre-market': 'Pre-Market',
-    'post-market': 'Post-Market',
-    closed: 'Closed'
+    'post-market': 'Post-Market'
   }
 
-  return sessionMap[status.session]
+  return sessionMap[status.session] || "Closed"
 })
 
 const badgeClass = computed(() => {

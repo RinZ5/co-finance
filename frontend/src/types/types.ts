@@ -84,7 +84,7 @@ export interface MarketStatus {
   exchange: string
   holiday: string | null
   isOpen: boolean
-  session: 'regular' | 'pre-market' | 'post-market' | 'closed'
+  session: 'regular' | 'pre-market' | 'post-market'
   t: number
   timezone: string
 }
