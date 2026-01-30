@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { useStockStore } from '../stores/stock';
-import { useWebSocketStore } from '../stores/websocketStore';
+import { useDashboardStore } from '../stores/dashboard';
+useDashboardStore
 
-const store = useStockStore();
-const wsStore = useWebSocketStore();
+const store = useDashboardStore();
 
 const rawQuery = ref('');
 const error = ref('');
@@ -40,7 +39,6 @@ const handleSubmit = () => {
   }
 
   store.setSymbol(symbol);
-  wsStore.subscribe(symbol);
   searchQuery.value = '';
   error.value = '';
 };

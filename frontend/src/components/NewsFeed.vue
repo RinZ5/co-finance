@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useStockStore } from '../stores/stock';
 import type { CompanyNews } from '../types/types';
 
 import { VueDatePicker } from '@vuepic/vue-datepicker';
@@ -8,56 +7,23 @@ import '@vuepic/vue-datepicker/dist/main.css';
 
 const props = defineProps<{
   news: CompanyNews[];
+  modelValue: [Date, Date] | null;
 }>();
 
-const store = useStockStore();
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: [Date, Date] | null): void;
+}>();
+
+const dateRange = computed({
+  get: () => props.modelValue,
+  set: (val) => emit('update:modelValue', val)
+});
 
 const formatDisplayDate = (unixTime: number) => {
   return new Date(unixTime * 1000).toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
   });
 };
-
-const startOfDay = (date: Date | null) => {
-  if (!date) return null
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
-}
-
-const endOfDay = (date: Date | null) => {
-  if (!date) return null
-  return new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    23, 59, 59, 999
-  )
-}
-
-const filteredNews = computed(() => {
-  if (!store.newsRange || store.newsRange.length !== 2) {
-    return props.news
-  }
-
-  const [from, to] = store.newsRange
-
-  if (!from || !to) {
-    return props.news
-  }
-
-  const start = startOfDay(from)!
-  const end = endOfDay(to)!
-
-  return props.news
-    .filter(item => {
-      const d = new Date(item.datetime * 1000)
-      return d >= start && d <= end
-    })
-    .sort((a, b) => b.datetime - a.datetime)
-})
-
 </script>
 
 <template>
@@ -76,7 +42,7 @@ const filteredNews = computed(() => {
             Date range
           </label>
 
-          <VueDatePicker v-model="store.newsRange" range :enable-time-picker="false" :time-picker="false" auto-apply
+          <VueDatePicker v-model="dateRange" range :enable-time-picker="false" :time-picker="false" auto-apply
             format="dd MMM yyyy" class="text-xs w-full" />
         </div>
       </div>
@@ -88,7 +54,7 @@ const filteredNews = computed(() => {
         No news found in selected range
       </div>
 
-      <a v-for="item in filteredNews" :key="item.id" :href="item.url" target="_blank" rel="noopener noreferrer"
+      <a v-for="item in news" :key="item.id" :href="item.url" target="_blank" rel="noopener noreferrer"
         class="block group hover:bg-gray-50 p-3 rounded-lg transition-colors border border-transparent hover:border-gray-100">
         <div class="flex gap-4">
           <div class="shrink-0">

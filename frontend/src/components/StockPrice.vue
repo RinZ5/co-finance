@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
 import type { StockQuote } from '../types/types.ts'
-import { useWebSocketStore } from '../stores/websocketStore.ts';
 
 const props = defineProps<{
   symbol: string;
@@ -9,11 +8,9 @@ const props = defineProps<{
   variant?: 'mobile' | 'desktop';
 }>();
 
-const store = useWebSocketStore()
-
 const prevClose = computed(() => props.quote.c - props.quote.d);
 
-const price = computed(() => store.currentPrice ?? props.quote.c);
+const price = computed(() => props.quote.c);
 const change = computed(() => price.value - prevClose.value);
 const percent = computed(() => (change.value / prevClose.value) * 100);
 
@@ -41,11 +38,6 @@ const percentBadgeClasses = computed(() => {
     ? 'bg-green-100 text-green-700'
     : 'bg-red-100 text-red-700'
     }`;
-});
-
-onMounted(() => {
-  store.connect();
-  store.subscribe(props.symbol);
 });
 </script>
 

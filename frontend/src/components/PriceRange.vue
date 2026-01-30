@@ -1,15 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { StockQuote } from '../types/types.ts'
-import { useWebSocketStore } from '../stores/websocketStore.ts';
 
 const props = defineProps<{
   quote: StockQuote;
 }>();
 
-const wsStore = useWebSocketStore()
-
-const currentPrice = computed(() => wsStore.currentPrice ?? props.quote.c);
+const currentPrice = computed(() => props.quote.c);
 
 const dayHigh = computed(() => Math.max(props.quote.h, currentPrice.value));
 const dayLow = computed(() => Math.min(props.quote.l, currentPrice.value));
