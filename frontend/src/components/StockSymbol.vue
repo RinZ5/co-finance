@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import type { MarketStatus } from '../types/types.ts'
 
 const props = defineProps<{
@@ -8,6 +8,7 @@ const props = defineProps<{
 }>();
 
 const now = ref(new Date())
+let timer: number | null = null
 
 const marketTime = computed(() => {
   if (!props.marketStatus) return '—'
@@ -50,10 +51,21 @@ const badgeClass = computed(() => {
   }
 })
 
+const updateClock = () => {
+  const currentDate = new Date()
+  now.value = currentDate
+
+  const msUntilNextMinute = (60 - currentDate.getSeconds()) * 1000 - currentDate.getMilliseconds() + 50
+
+  timer = window.setTimeout(updateClock, msUntilNextMinute)
+}
+
 onMounted(() => {
-  setInterval(() => {
-    now.value = new Date()
-  }, 60_000)
+  updateClock()
+})
+
+onUnmounted(() => {
+  if (timer) clearTimeout(timer)
 })
 </script>
 
