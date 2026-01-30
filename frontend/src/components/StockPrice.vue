@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed } from 'vue';
 import type { StockQuote } from '../types/types.ts'
 
 const props = defineProps<{
