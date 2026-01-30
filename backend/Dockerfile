@@ -1,13 +1,14 @@
-FROM golang:latest AS builder
+FROM golang:1.22-alpine AS builder
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache git
 
-COPY . .
+COPY go.mod go.sum ./
 
 RUN go mod download
-RUN go mod tidy
+
+COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd/server
 
