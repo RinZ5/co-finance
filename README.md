@@ -2,26 +2,18 @@
 
 A financial dashboard application with Vue.js frontend and Go backend, providing real-time stock market data through Finnhub API.
 
-## Quick Start (Docker)
+## Quick Start
 
-1. Copy environment file:
-   ```bash
-   cp .env.example .env
-   ```
+### Option 1: Docker-compose
+1. Copy environment file: `cp .env.example .env`
+2. Set your Finnhub API key in `.env`
+3. Run: `docker-compose up --build`
+4. Access: http://localhost:3000
 
-2. Set your Finnhub API key in `.env`:
-   ```
-   FINNHUB_API_KEY=your_actual_api_key
-   ```
-
-3. Build and run:
-   ```bash
-   docker-compose up --build -d
-   ```
-
-4. Access the application:
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8080
+### Option 2: Separate Deployment
+1. Backend: `cp backend/.env.example backend/.env`
+2. Frontend: `cp frontend/.env.example frontend/.env`
+3. Configure both files and deploy separately
 
 ## Local Development
 
@@ -41,5 +33,15 @@ npm run dev
 
 ## Environment Variables
 
-- `FINNHUB_API_KEY`: Your Finnhub API key (required)
-- `ALLOWED_ORIGINS`: CORS allowed origins (defaults to localhost ports)
+### Docker-compose (Root .env)
+- **FINNHUB_API_KEY**: Your Finnhub API key
+- **ALLOWED_ORIGINS**: Comma-separated allowed domains
+
+### Separate Deployment
+
+**Backend (backend/.env)**:
+- **FINNHUB_API_KEY**: Your Finnhub API key
+- **ALLOWED_ORIGINS**: Comma-separated allowed domains
+
+**Frontend (frontend/.env)**:
+- **VITE_BACKEND_URL**: Backend API base URL

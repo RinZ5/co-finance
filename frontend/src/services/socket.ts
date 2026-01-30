@@ -1,6 +1,6 @@
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || globalThis.location.origin;
 
-const WS_BASE_URL = BACKEND_URL.replace(/^http/, 'ws');
+const WS_BASE_URL = BACKEND_URL.replace(/^http(s)?/, 'ws$1');
 
 type Listener = (data: any) => void;
 
