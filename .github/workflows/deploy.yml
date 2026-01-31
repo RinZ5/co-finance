@@ -2,7 +2,7 @@ name: Deploy on Azure
 
 on:
   push:
-    branches: [prod, deploy-test]
+    branches: [main, deploy-test]
 
 jobs:
   build-and-deploy:
@@ -18,7 +18,7 @@ jobs:
       - name: Build Go Binary
         run: |
           cd backend
-          GOOS=linux GOARCH=amd64 go build -o ../main ./cmd/server
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ../main ./cmd/server
 
       - name: Setup Node
         uses: actions/setup-node@v4
