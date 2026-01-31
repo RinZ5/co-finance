@@ -17,6 +17,7 @@ jobs:
 
       - name: Build Go Binary
         run: |
+          cd backend
           GOOS=linux GOARCH=amd64 go build -o ../main ./cmd/server
 
       - name: Setup Node
