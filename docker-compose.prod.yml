@@ -11,14 +11,14 @@ services:
     ports:
       - "8080:8080"
     restart: always
-  
-    frontend:
-      build:
-        context: ./frontend
-        dockerfile: Dockerfile.prod
-      container_name: co-finance-frontend
-      ports:
-        - "30:80"
-      depends_on:
-        - backend
-      restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    container_name: co-finance-frontend
+    ports:
+      - "30:80"
+    depends_on:
+      - backend
+    restart: always

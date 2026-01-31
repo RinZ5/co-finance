@@ -32,7 +32,6 @@ jobs:
 
       - name: Create .env
         run: |
-          # Inject secrets into a file to send to the server
           echo "FINNHUB_API_KEY=${{ secrets.FINNHUB_API_KEY }}" > .env
           echo "ALLOWED_ORIGINS=http://localhost:30,http://${{ secrets.HOST }}:30" >> .env
 
