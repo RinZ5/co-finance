@@ -18,7 +18,7 @@ services:
       dockerfile: Dockerfile.prod
     container_name: co-finance-frontend
     ports:
-      - "80:30"
+      - "80:80"
     depends_on:
       - backend
     restart: always
