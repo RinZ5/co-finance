@@ -17,7 +17,7 @@ jobs:
 
       - name: Build Go Binary
         run: |
-          GOOS=linux GOARCH=amd64 go build -o main ./cmd/server
+          GOOS=linux GOARCH=amd64 go build -o ../main ./cmd/server
 
       - name: Setup Node
         uses: actions/setup-node@v4
