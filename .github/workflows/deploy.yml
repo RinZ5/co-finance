@@ -1,0 +1,76 @@
+name: Deploy on Azure
+
+on:
+  push:
+    branches: [prod, deploy-test]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with: { go-version: "1.24" }
+
+      - name: Build Go Binary
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o main ./cmd/server
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with: { node-version: "20" }
+
+      - name: Build Vue App
+        run: |
+          cd frontend
+          npm ci
+          npm run build
+
+      - name: Create .env
+        run: |
+          # Inject secrets into a file to send to the server
+          echo "FINNHUB_API_KEY=${{ secrets.FINNHUB_API_KEY }}" > .env
+          echo "ALLOWED_ORIGINS=http://localhost:30,http://${{ secrets.HOST }}:30" >> .env
+
+      - name: Copy Files
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: 22
+          target: "/home/${{ secrets.USERNAME }}/deploy-temp"
+          source: "main,frontend/dist,frontend/nginx.conf,backend/Dockerfile.prod,frontend/Dockerfile.prod,docker-compose.prod.yml,.env"
+
+      - name: Deploy on Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: 22
+          script: |
+            mkdir -p ~/co-finance/backend
+            mkdir -p ~/co-finance/frontend
+
+            mv ~/deploy-temp/main ~/co-finance/backend/main
+            mv ~/deploy-temp/backend/Dockerfile.prod ~/co-finance/backend/Dockerfile.prod
+            chmod +x ~/co-finance/backend/main
+
+            rm -rf ~/co-finance/frontend/dist
+            mv ~/deploy-temp/frontend/dist ~/co-finance/frontend/dist
+            mv ~/deploy-temp/frontend/Dockerfile.prod ~/co-finance/frontend/Dockerfile.prod
+            mv ~/deploy-temp/frontend/nginx.conf ~/co-finance/frontend/nginx.conf
+
+            mv ~/deploy-temp/docker-compose.prod.yml ~/co-finance/docker-compose.prod.yml
+            mv ~/deploy-temp/.env ~/co-finance/.env
+
+            rm -rf ~/deploy-temp
+
+            cd ~/co-finance
+            docker compose -f docker-compose.prod.yml up -d --build
+
+            docker image prune -f
