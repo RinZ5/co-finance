@@ -1,8 +1,8 @@
-name: Deploy on Azure
+name: Deploy on VM
 
 on:
   push:
-    branches: [main, deploy-test]
+    branches: [main, test/deploy-hostinger]
 
 jobs:
   build-and-deploy:
