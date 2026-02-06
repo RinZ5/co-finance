@@ -12,6 +12,15 @@ services:
       - "8080:8080"
     restart: always
 
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile.prod
+    restart: always
+    env_file: .env
+    networks:
+      - co-finance-net
+
   frontend:
     build:
       context: ./frontend
