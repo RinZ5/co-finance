@@ -31,3 +31,7 @@ services:
     depends_on:
       - backend
     restart: always
+
+networks:
+  co-finance-net:
+    driver: bridge
