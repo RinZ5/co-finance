@@ -2,7 +2,7 @@ name: Deploy on VM
 
 on:
   push:
-    branches: [main, test/deploy-hostinger]
+    branches: [main, feature/deployment]
 
 jobs:
   build-and-deploy:
@@ -15,10 +15,16 @@ jobs:
         uses: actions/setup-go@v5
         with: { go-version: "1.24" }
 
-      - name: Build Go Binary
+      - name: Build Go Binaries
         run: |
+          # Build Backend
           cd backend
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ../main ./cmd/server
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ../backend_main ./cmd/server
+          cd ..
+
+          # Build Gateway
+          cd gateway
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ../gateway_main .
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -33,7 +39,9 @@ jobs:
       - name: Create .env
         run: |
           echo "FINNHUB_API_KEY=${{ secrets.FINNHUB_API_KEY }}" > .env
-          echo "ALLOWED_ORIGINS=http://localhost:30,http://${{ secrets.HOST }}:30" >> .env
+          echo "GATEWAY_SECRET=${{ secrets.GATEWAY_SECRET }}" >> .env
+          echo "FINNHUB_WS_URL=ws://gateway:8081/ws" >> .env
+          echo "ALLOWED_ORIGINS=http://localhost:30,https://co-finance.supawit.win" >> .env
 
       - name: Copy Files
         uses: appleboy/scp-action@master
@@ -43,7 +51,7 @@ jobs:
           key: ${{ secrets.KEY }}
           port: 22
           target: "/home/${{ secrets.USERNAME }}/deploy-temp"
-          source: "main,frontend/dist,frontend/nginx.conf,backend/Dockerfile.prod,frontend/Dockerfile.prod,docker-compose.prod.yml,.env"
+          source: "backend_main,gateway_main,frontend/dist,frontend/nginx.conf,backend/Dockerfile.prod,frontend/Dockerfile.prod,gateway/Dockerfile.prod,docker-compose.prod.yml,.env"
 
       - name: Deploy on Server
         uses: appleboy/ssh-action@master
@@ -53,24 +61,35 @@ jobs:
           key: ${{ secrets.KEY }}
           port: 22
           script: |
+            # 1. Create Structure
             mkdir -p ~/co-finance/backend
             mkdir -p ~/co-finance/frontend
+            mkdir -p ~/co-finance/gateway  # New Folder
 
-            mv ~/deploy-temp/main ~/co-finance/backend/main
+            # 2. Move Backend
+            mv ~/deploy-temp/backend_main ~/co-finance/backend/main
             mv ~/deploy-temp/backend/Dockerfile.prod ~/co-finance/backend/Dockerfile.prod
             chmod +x ~/co-finance/backend/main
 
+            # 3. Move Gateway (New)
+            mv ~/deploy-temp/gateway_main ~/co-finance/gateway/gateway_main
+            mv ~/deploy-temp/gateway/Dockerfile.prod ~/co-finance/gateway/Dockerfile.prod
+            chmod +x ~/co-finance/gateway/gateway_main
+
+            # 4. Move Frontend
             rm -rf ~/co-finance/frontend/dist
             mv ~/deploy-temp/frontend/dist ~/co-finance/frontend/dist
             mv ~/deploy-temp/frontend/Dockerfile.prod ~/co-finance/frontend/Dockerfile.prod
             mv ~/deploy-temp/frontend/nginx.conf ~/co-finance/frontend/nginx.conf
 
+            # 5. Move Configs
             mv ~/deploy-temp/docker-compose.prod.yml ~/co-finance/docker-compose.prod.yml
             mv ~/deploy-temp/.env ~/co-finance/.env
 
             rm -rf ~/deploy-temp
 
+            # 6. Restart Docker
             cd ~/co-finance
-            docker compose -f docker-compose.prod.yml up -d --build
+            docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
 
             docker image prune -f
