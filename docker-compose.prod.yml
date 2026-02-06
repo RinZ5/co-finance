@@ -6,11 +6,11 @@ services:
     container_name: co-finance-backend
     env_file:
       - .env
-    environment:
-      - ALLOWED_ORIGINS=http://localhost:30,http://20.189.76.7:30
     ports:
       - "8080:8080"
     restart: always
+    networks:
+      - co-finance-net
 
   gateway:
     build:
@@ -31,6 +31,8 @@ services:
     depends_on:
       - backend
     restart: always
+    networks:
+      - co-finance-net
 
 networks:
   co-finance-net:
