@@ -105,55 +105,11 @@ func (g *Gateway) handleConnections() {
 	}
 }
 
-// func (g *Gateway) connectToSource() {
-// 	for {
-// 		log.Printf("Connecting to Finnhub: %s", g.finnhubURL)
-// 		conn, _, err := websocket.DefaultDialer.Dial(g.finnhubURL, nil)
-// 		if err != nil {
-// 			log.Printf("Dial error: %v. Retrying in 5s...", err)
-// 			time.Sleep(5 * time.Second)
-// 			continue
-// 		}
-// 		log.Println("Connected to Finnhub successfully!")
-//
-// 		done := make(chan struct{})
-// 		go func() {
-// 			defer close(done)
-// 			for {
-// 				_, message, err := conn.ReadMessage()
-// 				if err != nil {
-// 					log.Printf("Finnhub Read Error: %v", err)
-// 					return
-// 				}
-// 				g.broadcast <- message
-// 			}
-// 		}()
-//
-// 	Loop:
-// 		for {
-// 			select {
-// 			case msg := <-g.upstream:
-// 				err := conn.WriteMessage(websocket.TextMessage, msg)
-// 				if err != nil {
-// 					log.Printf("Finnhub Write Error: %v", err)
-// 					break Loop
-// 				}
-// 			case <-done:
-// 				break Loop
-// 			}
-// 		}
-//
-// 		conn.Close()
-// 		log.Println("Disconnected. Reconnecting in 2 seconds...")
-// 		time.Sleep(2 * time.Second)
-// 	}
-// }
-
 func (g *Gateway) connectToSource() {
 	backoff := 5 * time.Second
 
 	for {
-		log.Printf("Connecting to Finnhub: %s", g.finnhubURL)
+		log.Printf("Connecting to Finnhub...")
 
 		conn, _, err := websocket.DefaultDialer.Dial(g.finnhubURL, nil)
 		if err != nil {
