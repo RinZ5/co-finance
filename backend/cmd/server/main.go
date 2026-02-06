@@ -34,7 +34,7 @@ type Server struct {
 	client   *finnhub.Client
 }
 
-func initializeEnvironment() string {
+func initializeEnvironment() (string, string, string) {
 	err := godotenv.Load()
 	if err != nil {
 		log.Println("Warning: .env file not found, using environment variables")
@@ -45,14 +45,25 @@ func initializeEnvironment() string {
 		log.Fatal("Error: FINNHUB_API_KEY is not set.")
 	}
 
-	return apiKey
+	gatewayURL := os.Getenv("FINNHUB_WS_URL")
+	if gatewayURL == "" {
+		gatewayURL = "ws://localhost:8081/ws"
+		log.Println("Config: Using default Gateway URL:", gatewayURL)
+	}
+
+	gatewaySecret := os.Getenv("GATEWAY_SECRET")
+	if gatewaySecret == "" {
+		log.Println("Warning: GATEWAY_SECRET is empty. Websocket auth might fail.")
+	}
+
+	return apiKey, gatewayURL, gatewaySecret
 }
 
-func setupServer(apiKey string) *Server {
+func setupServer(apiKey, gatewayURL, gatewaySecret string) *Server {
 	hub := websocket.NewHub()
 	go hub.Run()
 
-	streamer := finnhub.NewStreamClient(apiKey, []string{"AAPL"})
+	streamer := finnhub.NewStreamClient(gatewayURL, gatewaySecret, []string{"AAPL"})
 	go streamer.Start(hub.Broadcast)
 
 	client := finnhub.NewClient(apiKey)
@@ -315,8 +326,9 @@ func (s *Server) setupRoutes(r *gin.Engine) {
 }
 
 func main() {
-	apiKey := initializeEnvironment()
-	server := setupServer(apiKey)
+	apiKey, gatewayURL, gatewaySecret := initializeEnvironment()
+
+	server := setupServer(apiKey, gatewayURL, gatewaySecret)
 
 	r := gin.Default()
 

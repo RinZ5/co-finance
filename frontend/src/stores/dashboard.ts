@@ -91,10 +91,17 @@ export const useDashboardStore = defineStore('dashboard', () => {
   }
 
   function initSocketListeners() {
-    socket.onMessage((data: any) => {
-      if (data.type === 'trade' && data.p) {
-        if (dashboardData.value?.quote) {
-          dashboardData.value.quote.c = data.p;
+    socket.onMessage((message: any) => {
+      if (message.type === 'trade' && message.data) {
+        const latestTrade = message.data
+          .slice()
+          .reverse()
+          .find((trade: any) => trade.s === symbol.value)
+
+        if (latestTrade) {
+          if (dashboardData.value?.quote) {
+            dashboardData.value.quote.c = latestTrade.p;
+          }
         }
       }
     });
