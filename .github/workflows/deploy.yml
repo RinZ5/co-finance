@@ -41,7 +41,7 @@ jobs:
           echo "FINNHUB_API_KEY=${{ secrets.FINNHUB_API_KEY }}" > .env
           echo "GATEWAY_SECRET=${{ secrets.GATEWAY_SECRET }}" >> .env
           echo "FINNHUB_WS_URL=ws://gateway:8081/ws" >> .env
-          echo "ALLOWED_ORIGINS=http://localhost:30,http://${{ secrets.HOST }}:30" >> .env
+          echo "ALLOWED_ORIGINS=http://localhost:30,https://co-finance.supawit.win" >> .env
 
       - name: Copy Files
         uses: appleboy/scp-action@master
