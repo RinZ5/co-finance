@@ -4,9 +4,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: co-finance-backend
-    environment:
-      - FINNHUB_API_KEY=${FINNHUB_API_KEY}
-      - ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+    env_file:
+      - ./backend/.env
     ports:
       - "8080:8080"
     networks:
@@ -23,6 +22,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - VITE_BACKEND_URL=${VITE_BACKEND_URL:-http://localhost:8080}
     container_name: co-finance-frontend
     ports:
       - "3000:80"

@@ -55,6 +55,7 @@ func (s *StreamClient) Start(outputChan chan<- []byte) {
 		s.mu.Unlock()
 
 		log.Println("Connected to Gateway!")
+		log.Printf("Gateway connection established from local address: %s", conn.LocalAddr())
 
 		for _, sym := range s.Symbols {
 			s.sendSubscribe(sym)
