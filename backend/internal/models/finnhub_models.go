@@ -101,3 +101,15 @@ type MarketStatus struct {
 	Timestamp int64   `json:"t"`
 	Timezone  string  `json:"timezone"`
 }
+
+// https://finnhub.io/docs/api/filings
+type Filings struct {
+	AccessNumber string `json:"accessNumber"`
+	Symbol       string `json:"symbol"`
+	Cik          string `json:"cik"`
+	Form         string `json:"form"`
+	FiledDate    string `json:"filedDate"`
+	AcceptedDate string `json:"acceptedDate"`
+	ReportUrl    string `json:"reportUrl"`
+	FilingUrl    string `json:"filingUrl"`
+}

@@ -407,3 +407,64 @@ func TestGetMarketStatus(t *testing.T) {
 		t.Errorf("Expected timestamp 1697018041, got %d", status.Timestamp)
 	}
 }
+
+func TestGetFilings(t *testing.T) {
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/stock/filings" {
+			t.Errorf("Expected path /stock/filings, got %s", r.URL.Path)
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`[
+			{
+				"accessNumber": "0001193125-20-050884",
+				"symbol": "AAPL",
+				"cik": "320193",
+				"form": "8-K",
+				"filedDate": "2020-02-27 00:00:00",
+				"acceptedDate": "2020-02-27 06:14:21",
+				"reportUrl": "https://www.sec.gov/ix?doc=/Archives/edgar/data/320193/000119312520050884/d865740d8k.htm",
+				"filingUrl": "https://www.sec.gov/Archives/edgar/data/320193/000119312520050884/0001193125-20-050884-index.html"
+			},
+			{
+				"accessNumber": "0001193125-20-039203",
+				"symbol": "AAPL",
+				"cik": "320193",
+				"form": "8-K",
+				"filedDate": "2020-02-18 00:00:00",
+				"acceptedDate": "2020-02-18 06:24:57",
+				"reportUrl": "https://www.sec.gov/ix?doc=/Archives/edgar/data/320193/000119312520039203/d845033d8k.htm",
+				"filingUrl": "https://www.sec.gov/Archives/edgar/data/320193/000119312520039203/0001193125-20-039203-index.html"
+			}
+		]`))
+	}))
+	defer mockServer.Close()
+
+	client := NewClient("fake-key")
+	client.BaseURL = mockServer.URL
+
+	filings, err := client.GetFilings("AAPL")
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	if len(filings) != 2 {
+		t.Errorf("Expected 2 filings, got %d", len(filings))
+	}
+
+	if filings[0].AccessNumber != "0001193125-20-050884" {
+		t.Errorf("Expected access number 0001193125-20-050884, got %s", filings[0].AccessNumber)
+	}
+
+	if filings[0].Symbol != "AAPL" {
+		t.Errorf("Expected symbol AAPL, got %s", filings[0].Symbol)
+	}
+
+	if filings[0].Form != "8-K" {
+		t.Errorf("Expected form 8-K, got %s", filings[0].Form)
+	}
+
+	if filings[1].AccessNumber != "0001193125-20-039203" {
+		t.Errorf("Expected access number 0001193125-20-039203, got %s", filings[1].AccessNumber)
+	}
+}

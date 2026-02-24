@@ -311,6 +311,23 @@ func (s *Server) handleMarketStatus(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, market)
 }
 
+func (s *Server) handleFilings(ctx *gin.Context) {
+	symbol := ctx.Query("symbol")
+
+	if symbol == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Symbol parameter is required"})
+		return
+	}
+
+	filings, err := s.client.GetFilings(symbol)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, filings)
+}
+
 func (s *Server) setupRoutes(r *gin.Engine) {
 	wsAllowedOrigins, _ := setupOrigins()
 
@@ -323,6 +340,7 @@ func (s *Server) setupRoutes(r *gin.Engine) {
 	r.GET("/api/dashboard", s.handleDashboard)
 	r.GET("/api/company-news", s.handleCompanyNews)
 	r.GET("/api/market-status", s.handleMarketStatus)
+	r.GET("/api/filings", s.handleFilings)
 }
 
 func main() {

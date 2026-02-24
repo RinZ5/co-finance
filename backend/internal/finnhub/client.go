@@ -176,3 +176,24 @@ func (c *Client) GetMarketStatus(market string) (*models.MarketStatus, error) {
 
 	return &marketStatus, nil
 }
+
+func (c *Client) GetFilings(symbol string) ([]models.Filings, error) {
+	url := fmt.Sprintf("%s/stock/filings?symbol=%s&token=%s", c.BaseURL, symbol, c.ApiKey)
+
+	resp, err := c.HTTPClient.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API error: status %d", resp.StatusCode)
+	}
+
+	var filings []models.Filings
+	if err := json.NewDecoder(resp.Body).Decode(&filings); err != nil {
+		return nil, err
+	}
+
+	return filings, nil
+}
